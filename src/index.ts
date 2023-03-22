@@ -98,13 +98,13 @@ type GetRecordPaths<T, Depth extends number, K extends keyof T = keyof T> = K ex
 type GetArrayPaths<T, Depth extends number> = `${number}.${Path<GetArrayElement<T>, Depth>}`
 
 // get all possible paths of a tuple
-type GetTuplePaths<T, Depth extends number> = NumbersToZero<MinusOne<TupleLength<T>>, Depth> extends infer R ? R extends number ? `${R}` | `${R}.${Path<TupleElement<T, R>, Depth>}` : never : never
+type GetTuplePaths<T, Depth extends number> = NumbersToZero<MinusOne<TupleLength<T>>, Depth> extends infer R ? R extends number ? R | `${R}.${Path<TupleElement<T, R>, Depth>}` : never : never
 
 type PathStep<T, Depth extends number> = IsAny<T> extends true ? string
 	: IsUnknown<T> extends true ? never
 		: IsPrimitive<T> extends true ? never
 			: IsTuple<T> extends true ? GetTuplePaths<T, Depth>
-			: IsArray<T> extends true ? `${number}` | GetArrayPaths<T, Depth>
+			: IsArray<T> extends true ? number | GetArrayPaths<T, Depth>
 				: HasIndexSignature<T> extends true ? (string & Record<never, never>) | GetRecordPaths<RemoveIndexSignature<T>, Depth>
 					: GetRecordPaths<T, Depth>
 
@@ -133,7 +133,7 @@ type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true ? any
 type PathValue<T, P, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathValueStep<T, P, Depth> : never
 
 // final path value type
-type PathValueEntry<T, Depth extends number = 25, P extends Path<T, Depth> = Path<T, Depth>> = PathValueStep<T, P, Depth>
+type PathValueEntry<T, P extends Path<T, Depth>, Depth extends number = 25> = PathValueStep<T, P, Depth>
 
 /**
  * Retrives a value from an object by dot notation
@@ -141,13 +141,13 @@ type PathValueEntry<T, Depth extends number = 25, P extends Path<T, Depth> = Pat
  * @param obj - object to get value from 
  * @param path - path to value
  */
-function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>>(obj: T, path: P): PathValueEntry<T, 25, P> {
+function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>>(obj: T, path: P): PathValueEntry<T, P, 25> {
 	const pathArr = (path as string).split('.')
 
-	return pathArr.reduce((acc: any, cur) => acc?.[cur], obj) as PathValueEntry<T, 25, P>
+	return pathArr.reduce((acc: any, cur) => acc?.[cur], obj) as PathValueEntry<T, P, 25>
 }
 
-function setByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>, V extends PathValueEntry<T, 25, P>>(obj: T, path: P, value: V): void {
+function setByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>, V extends PathValueEntry<T, P, 25>>(obj: T, path: P, value: V): void {
 	const pathArr = (path as string).split('.')
 	const lastKey = pathArr.pop()
 
