@@ -164,4 +164,6 @@ function setByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends 
 	objToSet[lastKey] = value
 }
 
-export type { Path, PathValueEntry as PathValue, getByPath, setByPath }
+export type { Path, PathValueEntry as PathValue }
+
+export { getByPath, setByPath }
