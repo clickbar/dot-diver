@@ -141,10 +141,27 @@ type PathValueEntry<T, Depth extends number = 25, P extends Path<T, Depth> = Pat
  * @param obj - object to get value from 
  * @param path - path to value
  */
-function getByPath<T extends Record<RecordKeys, unknown> | unknown[] = never, P extends Path<T, 25> = never>(obj: T, path: P): PathValueEntry<T, 25, P> {
+function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>>(obj: T, path: P): PathValueEntry<T, 25, P> {
 	const pathArr = (path as string).split('.')
 
 	return pathArr.reduce((acc: any, cur) => acc?.[cur], obj) as PathValueEntry<T, 25, P>
 }
 
-export type { Path, PathValueEntry as PathValue, getByPath }
+function setByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>, V extends PathValueEntry<T, 25, P>>(obj: T, path: P, value: V): void {
+	const pathArr = (path as string).split('.')
+	const lastKey = pathArr.pop()
+
+	if (lastKey === undefined) {
+		throw new Error('Path is empty')
+	}
+
+	const objToSet = pathArr.reduce((acc: any, cur) => acc?.[cur], obj)
+
+	if (objToSet === undefined) {
+		throw new Error('Path is invalid')
+	}
+
+	objToSet[lastKey] = value
+}
+
+export type { Path, PathValueEntry as PathValue, getByPath, setByPath }
