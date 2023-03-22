@@ -36,8 +36,22 @@ type IsArray<T> = T extends Array<any> ? true : false
 // Get the type of an array element
 type GetArrayElement<T> = T extends Array<infer U> ? U : never
 
-// check if a type is any
+/**
+ * check if a type is any
+ * @link https://stackoverflow.com/a/49928360/1490091
+ */
 type IsAny<T> = 0 extends (1 & T) ? true : false
+
+// check if a type is never
+type IsNever<T> = [T] extends [never] ? true : false
+
+/**
+ * check if a type is unknown
+ * @link https://github.com/sindresorhus/type-fest
+ */
+type IsUnknown<T> = IsNever<T> extends true ? false
+	: IsAny<T> extends true ? false :
+		unknown extends T ? true : false
 
 // check if a type is a primitive
 type IsPrimitive<T> = T extends string | number | boolean | bigint | symbol | undefined | null ? true : false
@@ -60,6 +74,8 @@ type NumbersToZero<L extends number, Depth extends number> =
 	L extends -1 ? never :
 	NumbersToZero<MinusOne<L>, MinusOne<Depth>> | L
 
+// possible recod keys
+type RecordKeys = string | number | symbol
 /* -------------------------------------------------------------------------- */
 /*                                 Math Types                                 */
 /* -------------------------------------------------------------------------- */
@@ -85,16 +101,18 @@ type GetArrayPaths<T, Depth extends number> = `${number}.${Path<GetArrayElement<
 type GetTuplePaths<T, Depth extends number> = NumbersToZero<MinusOne<TupleLength<T>>, Depth> extends infer R ? R extends number ? `${R}` | `${R}.${Path<TupleElement<T, R>, Depth>}` : never : never
 
 type PathStep<T, Depth extends number> = IsAny<T> extends true ? string
-	: IsPrimitive<T> extends true ? never
-		: IsTuple<T> extends true ? GetTuplePaths<T, Depth>
-		: IsArray<T> extends true ? `${number}` | GetArrayPaths<T, Depth>
-			: HasIndexSignature<T> extends true ? (string & Record<never, never>) | GetRecordPaths<RemoveIndexSignature<T>, Depth>
-				: GetRecordPaths<T, Depth>
+	: IsUnknown<T> extends true ? never
+		: IsPrimitive<T> extends true ? never
+			: IsTuple<T> extends true ? GetTuplePaths<T, Depth>
+			: IsArray<T> extends true ? `${number}` | GetArrayPaths<T, Depth>
+				: HasIndexSignature<T> extends true ? (string & Record<never, never>) | GetRecordPaths<RemoveIndexSignature<T>, Depth>
+					: GetRecordPaths<T, Depth>
 
 // Final path type
 type Path<T, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathStep<ExcludeNullUndefined<T>, MinusOne<Depth>> : never
 
 type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true ? any
+: IsUnknown<T> extends true ? unknown
 : IsNullableOrUndefineable<T> extends true ? PathValueStep<ExcludeNullUndefined<T>, P, Depth> | undefined
 	: IsTuple<T> extends true
 		? P extends `${infer H}.${infer R}`
@@ -117,10 +135,16 @@ type PathValue<T, P, Depth extends number = 25> = Depth extends 0 ? never : T ex
 // final path value type
 type PathValueEntry<T, Depth extends number = 25, P extends Path<T, Depth> = Path<T, Depth>> = PathValueStep<T, P, Depth>
 
-function getByPath<T, Depth extends number = 25, P extends Path<T, Depth> = Path<T, Depth>, >(obj: T, path: P): PathValueEntry<T, Depth, P> {
+/**
+ * Retrives a value from an object by dot notation
+ * 
+ * @param obj - object to get value from 
+ * @param path - path to value
+ */
+function getByPath<T extends Record<RecordKeys, unknown> | unknown[] = never, P extends Path<T, 25> = never>(obj: T, path: P): PathValueEntry<T, 25, P> {
 	const pathArr = (path as string).split('.')
 
-	return pathArr.reduce((acc: any, cur) => acc?.[cur], obj) as PathValueEntry<T, Depth, P>
+	return pathArr.reduce((acc: any, cur) => acc?.[cur], obj) as PathValueEntry<T, 25, P>
 }
 
 export type { Path, PathValueEntry as PathValue, getByPath }
