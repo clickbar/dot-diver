@@ -1,7 +1,7 @@
 {
-  "name": "dot-diver",
+  "name": "@clickbar/dot-diver",
   "version": "1.0.0",
-  "description": "",
+  "description": "Types and utilities to access object properties by dot notation.",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -17,9 +17,23 @@
   "scripts": {
     "build": "vite build && tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "ts",
+    "types",
+    "typescript",
+    "util",
+    "utility",
+    "utilities",
+    "dot",
+    "path",
+    "dot-path"
+  ],
+  "author": "clickbar.",
+  "license": "MIT",
+  "maintainers": [
+    "Daniel Thoma <dt@clickbar.dev> (https://github.com/djfhe)",
+    "Tobias Kröll <tk@clickbar.dev> (https://github.com/saibotk)"
+  ],
   "devDependencies": {
     "@clickbar/eslint-config-typescript": "^4.3.0",
     "eslint": "^8.36.0",
