@@ -115,7 +115,12 @@ type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true ? any
 type PathValue<T, P, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathValueStep<T, P, Depth> : never
 
 // final path value type
-type PathValueEntry<T, P extends Path<T>, Depth extends number = 25> = PathValueStep<T, P, Depth>
+type PathValueEntry<T, Depth extends number = 25, P extends Path<T, Depth> = Path<T, Depth>> = PathValueStep<T, P, Depth>
 
+function getByPath<T, Depth extends number = 25, P extends Path<T, Depth> = Path<T, Depth>, >(obj: T, path: P): PathValueEntry<T, Depth, P> {
+	const pathArr = (path as string).split('.')
 
-export type { Path, PathValueEntry as PathValue }
+	return pathArr.reduce((acc: any, cur) => acc?.[cur], obj) as PathValueEntry<T, Depth, P>
+}
+
+export type { Path, PathValueEntry as PathValue, getByPath }
