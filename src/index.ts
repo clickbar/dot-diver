@@ -24,6 +24,9 @@ type HasIndexSignature<T> = string extends keyof T ? true
 		: symbol extends keyof T ? true
 			: false
 
+type GetValidIndexSignature<T> = Exclude<keyof T, symbol> extends infer K ? K extends string | number ? K : never : never
+
+
 // Keys have to be strings or number and can't contain a dot since we won't be able to differ between and key with a dot and a nested key
 type RemoveInvalidDotPathKeys<T> = T extends symbol ? never
 	: T extends number ? T
@@ -76,6 +79,12 @@ type NumbersToZero<L extends number, Depth extends number> =
 
 // possible recod keys
 type RecordKeys = string | number | symbol
+
+// remove readonly from members of a record
+type Writeable<T> = {
+	-readonly [K in keyof T]: T[K]
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                 Math Types                                 */
 /* -------------------------------------------------------------------------- */
@@ -105,11 +114,11 @@ type PathStep<T, Depth extends number> = IsAny<T> extends true ? string
 		: IsPrimitive<T> extends true ? never
 			: IsTuple<T> extends true ? GetTuplePaths<T, Depth>
 			: IsArray<T> extends true ? number | GetArrayPaths<T, Depth>
-				: HasIndexSignature<T> extends true ? (string & Record<never, never>) | GetRecordPaths<RemoveIndexSignature<T>, Depth>
+				: HasIndexSignature<T> extends true ? GetValidIndexSignature<T> | GetRecordPaths<RemoveIndexSignature<T>, Depth>
 					: GetRecordPaths<T, Depth>
 
 // Final path type
-type Path<T, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathStep<ExcludeNullUndefined<T>, MinusOne<Depth>> : never
+type Path<T, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<Depth>> : never
 
 type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true ? any
 : IsUnknown<T> extends true ? unknown
@@ -130,10 +139,10 @@ type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true ? any
 				: never
 
 // nearly same function as PathValueEntry, but without constraints for P so it is easier to use in PathValueStep
-type PathValue<T, P, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathValueStep<T, P, Depth> : never
+type PathValue<T, P, Depth extends number = 25> = Depth extends 0 ? never : T extends T ? PathValueStep<Writeable<T>, P, Depth> : never
 
 // final path value type
-type PathValueEntry<T, P extends Path<T, Depth>, Depth extends number = 25> = PathValueStep<T, P, Depth>
+type PathValueEntry<T, P extends Path<T, Depth>, Depth extends number = 25> = PathValue<T, P, Depth>
 
 /**
  * Retrives a value from an object by dot notation
