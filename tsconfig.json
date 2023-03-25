@@ -3,10 +3,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "moduleResolution": "bundler",
     "strict": true,
     "resolveJsonModule": true,
@@ -17,14 +14,7 @@
     "noImplicitReturns": true,
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
-    "declarationDir": "dist"
+    "noEmit": true
   },
-  "include": [
-    "src",
-    "test",
-    "vite.config.ts"
-  ]
+  "include": ["src", "test", "vite.config.ts"]
 }
