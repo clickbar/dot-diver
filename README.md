@@ -29,9 +29,6 @@ Dot notation is a popular and convenient way to access deeply nested properties 
 - 🪶 Tiny footprint
 
 <br>
-
----
-
 <br>
 
 ## 📦 Installation
@@ -57,14 +54,9 @@ pnpm install -D @clickbar/dot-diver
 ```
 
 <br>
-
----
-
 <br>
 
 ## 🚀 Usage
-
-<br>
 
 ### 🔎 `getByPath` and 🔏 `setByPath`
 
@@ -223,33 +215,28 @@ export { getByPathDepth10 as getByPath, setByPathDepth10 as setByPath }
 ```
 
 <br>
-
----
-
 <br>
 
 ## ❓ FAQ
 
-<br>
-
 ### ❗ Why are my paths truncated in a object with index signature?
 
-> See this [issue](https://github.com/clickbar/dot-diver/issues/2).
+See this [issue](https://github.com/clickbar/dot-diver/issues/2).
 
 <br>
 
 ### ❗ Why are my paths truncated inside an array?
 
-> Your paths are not truncated. Typescript will still validate them.
-> Some IDEs have problems with displaying `children.${number}` paths.
-> If you can, define the array as an tuple. This will include all paths in the auto completion.
+Your paths are not truncated. Typescript will still validate them.
+Some IDEs have problems with displaying `children.${number}` paths.
+If you can, define the array as an tuple. This will include all paths in the auto completion.
 
 <br>
 
 ### ❗ I get the error "Type instantiation is excessively deep and possibly infinite.ts(2589)"
 
-> This happens if typescript reaches its maximum depth limit. This library should prevent this, but it can still happen if a object has a lot of cyclic dependencies.\
-> For example:
+This happens if typescript reaches its maximum depth limit. This library should prevent this, but it can still happen if a object has a lot of cyclic dependencies.\
+For example:
 
 ```typescript
 type TestType = {
@@ -263,12 +250,8 @@ type TestType = {
 }
 ```
 
-> You can try to decrease the depth limit of the autocompletion by reimplementing the `getByPath` and `setByPath` functions.
-> See the section [Customizing the depth limit](#customizing-the-depth-limit).
-
-<br>
-
----
+You can try to decrease the depth limit of the auto completion by reimplementing the `getByPath` and `setByPath` functions.
+See [this section](#customizing-the-depth-limit) for customizing the depth limit.
 
 <br>
 
@@ -278,18 +261,10 @@ If you would like to contribute to Dot Diver, feel free to fork the repository, 
 
 <br>
 
----
-
-<br>
-
 ## 📄 License
 
 Dot Diver is licensed under the [MIT License](LICENSE).
 
 <br>
 
----
-
-<br>
-
-## 🎉 Happy diving! 🌊
+🎉 Happy diving! 🌊
