@@ -1,21 +1,20 @@
-import { it, assertType } from 'vitest'
-
-import type { Path, PathValue } from '../src'
+import { it, expectTypeOf } from 'vitest'
+import { Path, PathValue } from '../src'
 
 /* -------------------------------------------------------------------------- */
 /*                               Primitive Tests                              */
 /* -------------------------------------------------------------------------- */
 
 it('Path type throws never for other types', () => {
-  assertType<never>(null as unknown as Path<string>)
-  assertType<never>(null as unknown as Path<number>)
-  assertType<never>(null as unknown as Path<boolean>)
-  assertType<never>(null as unknown as Path<bigint>)
-  assertType<never>(null as unknown as Path<symbol>)
-  assertType<never>(null as unknown as Path<undefined>)
-  assertType<never>(null as unknown as Path<null>)
-  assertType<never>(null as unknown as Path<unknown>)
-  assertType<never>(null as unknown as Path<never>)
+    expectTypeOf<Path<string>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<number>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<boolean>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<bigint>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<symbol>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<undefined>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<null>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<unknown>>().toEqualTypeOf<never>()
+    expectTypeOf<Path<never>>().toEqualTypeOf<never>()
 })
 
 it('Path type returns primitive members on first level', () => {
@@ -42,7 +41,7 @@ it('Path type returns primitive members on first level', () => {
     | 'unknownProp'
     | 'neverProp'
 
-  assertType<ExpectedType>(null as unknown as Path<typeof test>)
+    expectTypeOf<Path<typeof test>>().toEqualTypeOf<ExpectedType>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -54,7 +53,7 @@ it('Symbols are not allowed members', () => {
     [Symbol()]: 'a',
   }
 
-  assertType<never>(null as unknown as Path<typeof test>)
+    expectTypeOf<Path<typeof test>>().toEqualTypeOf<never>()
 })
 
 it('symbol index signature gets ignored', () => {
@@ -62,7 +61,7 @@ it('symbol index signature gets ignored', () => {
     [index: symbol]: string
   }
 
-  assertType<never>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<never>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -70,9 +69,9 @@ it('symbol index signature gets ignored', () => {
 /* -------------------------------------------------------------------------- */
 
 it('Arrays can be accessed with number', () => {
-  const test = ['a', 'b', 'c']
+    const test: string[] = ['a', 'b', 'c']
 
-  assertType<number>(null as unknown as Path<typeof test>)
+    expectTypeOf<Path<typeof test>>().toEqualTypeOf<number>()
 
   const testObject = {
     array: test,
@@ -80,13 +79,13 @@ it('Arrays can be accessed with number', () => {
 
   type ExpectedType = 'array' | `array.${number}`
 
-  assertType<ExpectedType>(null as unknown as Path<typeof testObject>)
+    expectTypeOf<Path<typeof testObject>>().toEqualTypeOf<ExpectedType>()
 
-  // @ts-expect-error - string is not a number
-  assertType<'array' | `array.${string}`>(null as unknown as Path<typeof testObject, string>)
+    // @ts-expect-error - string is not a number
+    expectTypeOf<Path<typeof testObject>>().toEqualTypeOf<'array' | `array.${string}`>()
 
-  // @ts-expect-error - 0 is to narrow
-  assertType<'array' | `array.0`>(null as unknown as Path<typeof testObject>)
+    // @ts-expect-error - 0 is to narrow
+    expectTypeOf<Path<typeof testObject>>().toEqualTypeOf<'array' | `array.0`>()
 })
 
 it('nullable arrays can be accessed with number', () => {
@@ -96,7 +95,7 @@ it('nullable arrays can be accessed with number', () => {
 
     type ExpectedType = 'array' | `array.${number}` | `array.${number}.a` | `array.${number}.b`
 
-    assertType<ExpectedType>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -106,7 +105,7 @@ it('nullable arrays can be accessed with number', () => {
 it('Tuples can be accessed with number', () => {
   type TestType = ['a', 'b', 'c']
 
-  assertType<0 | 1 | 2>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<0 | 1 | 2>()
 
   type TestTypeObject = {
     tuple: TestType
@@ -114,56 +113,46 @@ it('Tuples can be accessed with number', () => {
 
   type ExpectedType = 'tuple' | `tuple.${0 | 1 | 2}`
 
-  assertType<ExpectedType>(null as unknown as Path<TestTypeObject>)
+    expectTypeOf<Path<TestTypeObject>>().toEqualTypeOf<ExpectedType>()
 
-  // @ts-expect-error - string is not a number
-  assertType<'tuple' | `tuple.${string}`>(null as unknown as Path<TestTypeObject, string>)
+    // @ts-expect-error - string is not a number
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<'tuple' | `tuple.${string}`>()
+})
 })
 
 /* -------------------------------------------------------------------------- */
 /*                              Optional Members                              */
 /* -------------------------------------------------------------------------- */
 
-it('Optional members are return with undefined', () => {
-  type TestType = {
-    optionalProp?: string
-  }
-
-  type ExpectedType = string | undefined
-
-  assertType<ExpectedType>(null as unknown as PathValue<TestType, 'optionalProp'>)
-
-  type TestTypeWithOptionalObject = {
-    optionalProp?: {
-      stringProp: string
+it('Paths of optional members gets returned', () => {
+    type TestType = {
+        optionalProp?: string
     }
-  }
 
-  type ExpectedTypeWithOptionalObject =
-    | {
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<'optionalProp'>()
+
+
+    type TestTypeWithOptionalObject = {
+        optionalProp?: {
+            stringProp: string
+        }
+    }
+
+    expectTypeOf<Path<TestTypeWithOptionalObject>>().toEqualTypeOf<'optionalProp' | `optionalProp.stringProp`>()
+
+
+    type ExpectedTypeWithOptionalObject = {
         stringProp: string
       }
     | undefined
 
-  assertType<ExpectedTypeWithOptionalObject>(
-    null as unknown as PathValue<TestTypeWithOptionalObject, 'optionalProp'>
-  )
-  assertType<ExpectedType>(
-    null as unknown as PathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>
-  )
+    expectTypeOf<Path<ExpectedTypeWithOptionalObject>>().toEqualTypeOf<'stringProp'>()
 
   type TestTypeWithOptionalArray = {
     optionalProp?: string[]
   }
 
-  type ExpectedTypeWithOptionalArray = string[] | undefined
-
-  assertType<ExpectedTypeWithOptionalArray>(
-    null as unknown as PathValue<TestTypeWithOptionalArray, 'optionalProp'>
-  )
-  assertType<string | undefined>(
-    null as unknown as PathValue<TestTypeWithOptionalArray, 'optionalProp.0'>
-  )
+    expectTypeOf<Path<TestTypeWithOptionalArray>>().toEqualTypeOf<'optionalProp' | `optionalProp.${number}`>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -177,7 +166,7 @@ it('Readonly values can be accessed', () => {
 
   type ExpectedType = 'stringProp'
 
-  assertType<ExpectedType>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>()
 })
 
 it('Readonly arrays can be accessed', () => {
@@ -187,7 +176,7 @@ it('Readonly arrays can be accessed', () => {
 
   type ExpectedType = 'array' | `array.${number}`
 
-  assertType<ExpectedType>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>()
 })
 
 it('Readonly tuples can be accessed', () => {
@@ -197,7 +186,9 @@ it('Readonly tuples can be accessed', () => {
 
   type ExpectedType = 'tuple' | `tuple.${0 | 1 | 2}`
 
-  assertType<ExpectedType>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>(
+
+    )
 })
 
 it('Readonly objects can be accessed', () => {
@@ -209,7 +200,7 @@ it('Readonly objects can be accessed', () => {
 
   type ExpectedType = 'object' | `object.stringProp`
 
-  assertType<ExpectedType>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>()
 })
 
 it('Readonly objects with optional members can be accessed', () => {
@@ -221,7 +212,7 @@ it('Readonly objects with optional members can be accessed', () => {
 
   type ExpectedType = 'object' | `object.stringProp`
 
-  assertType<ExpectedType>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -233,7 +224,7 @@ it('Type of index signature gets returned correctly', () => {
     [index: string | number]: string
   }
 
-  assertType<string | number>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<string | number>()
 
   type TestType2 = {
     [index: string]: string
@@ -246,7 +237,7 @@ it('Type of index signature gets returned correctly', () => {
     [index: number]: string
   }
 
-  assertType<number>(null as unknown as Path<TestType3>)
+    expectTypeOf<Path<TestType3>>().toEqualTypeOf<number>()
 })
 
 it('Symbols as index signature gets ignored', () => {
@@ -254,25 +245,25 @@ it('Symbols as index signature gets ignored', () => {
     [index: symbol]: string
   }
 
-  assertType<never>(null as unknown as Path<TestType>)
+    expectTypeOf<Path<TestType>>().toEqualTypeOf<never>()
 
-  type TestType2 = {
-    [index: string | symbol]: string
-  }
+    type TestType2 = {
+        [index: string | symbol]: string
+    }
 
-  assertType<string | number>(null as unknown as Path<TestType2>)
+    expectTypeOf<Path<TestType2>>().toEqualTypeOf<string | number>()
 
   type TestType3 = {
     [index: number | symbol]: string
   }
 
-  assertType<number>(null as unknown as Path<TestType3>)
+    expectTypeOf<Path<TestType3>>().toEqualTypeOf<number>()
 
   type TestType4 = {
     [index: string | number | symbol]: string
   }
 
-  assertType<string | number>(null as unknown as Path<TestType4>)
+    expectTypeOf<Path<TestType4>>().toEqualTypeOf<string | number>()
 })
 
 it('Nested Path of nested objects in index signature gets returned correctly', () => {
@@ -292,12 +283,12 @@ it('Nested Path of nested objects in index signature gets returned correctly', (
     | `${string}.${string}.a`
     | `${string}.${string}.b`
 
-  assertType<ExpectedType>(null as unknown as Path<TestTyp>)
+    expectTypeOf<Path<TestTyp>>().toEqualTypeOf<ExpectedType>()
 
-  // This works but the returning type of Path is far to broad and ignores the nested structure inside a index signature
-  assertType<string | number>(null as unknown as Path<TestTyp>) // should throw an error
-  // Typescript simplifies string | `${string}.${string}` to string
-  // We can't really do anything about this without sacrificing readability of code completion
+    // This works but the returning type of Path is far to broad and ignores the nested structure inside a index signature
+    expectTypeOf<Path<TestTyp>>().toEqualTypeOf<string | number>() // should throw an error
+    // Typescript simplifies string | `${string}.${string}` to string
+    // We can't really do anything about this without sacrificing readability of code completion
 })
 
 /* -------------------------------------------------------------------------- */
@@ -317,15 +308,47 @@ it('PathValue returns the correct type', () => {
     neverProp: null as never,
   }
 
-  assertType<string>(null as unknown as PathValue<typeof test, 'stringProp'>)
-  assertType<number>(null as unknown as PathValue<typeof test, 'numberProp'>)
-  assertType<boolean>(null as unknown as PathValue<typeof test, 'booleanProp'>)
-  assertType<bigint>(null as unknown as PathValue<typeof test, 'bigintProp'>)
-  assertType<symbol>(null as unknown as PathValue<typeof test, 'symbolProp'>)
-  assertType<undefined>(null as unknown as PathValue<typeof test, 'undefinedProp'>)
-  assertType<null>(null as unknown as PathValue<typeof test, 'nullProp'>)
-  assertType<unknown>(null as unknown as PathValue<typeof test, 'unknownProp'>)
-  assertType<never>(null as unknown as PathValue<typeof test, 'neverProp'>)
+    expectTypeOf<PathValue<typeof test, 'stringProp'>>().toEqualTypeOf<string>()
+    expectTypeOf<PathValue<typeof test, 'numberProp'>>().toEqualTypeOf<number>()
+    expectTypeOf<PathValue<typeof test, 'booleanProp'>>().toEqualTypeOf<boolean>()
+    expectTypeOf<PathValue<typeof test, 'bigintProp'>>().toEqualTypeOf<bigint>()
+    expectTypeOf<PathValue<typeof test, 'symbolProp'>>().toEqualTypeOf<symbol>()
+    expectTypeOf<PathValue<typeof test, 'undefinedProp'>>().toEqualTypeOf<undefined>()
+    expectTypeOf<PathValue<typeof test, 'nullProp'>>().toEqualTypeOf<null>()
+    expectTypeOf<PathValue<typeof test, 'unknownProp'>>().toEqualTypeOf<unknown>()
+    expectTypeOf<PathValue<typeof test, 'neverProp'>>().toEqualTypeOf<never>()
+})
+
+it('Optional members are return with undefined', () => {
+    type TestType = {
+        optionalProp?: string
+    }
+
+    type ExpectedType = string | undefined
+
+    expectTypeOf<PathValue<TestType, 'optionalProp'>>().toEqualTypeOf<ExpectedType>()
+
+    type TestTypeWithOptionalObject = {
+        optionalProp?: {
+            stringProp: string
+        }
+    }
+
+    type ExpectedTypeWithOptionalObject = {
+        stringProp: string
+    } | undefined
+
+    expectTypeOf<PathValue<TestTypeWithOptionalObject, 'optionalProp'>>().toEqualTypeOf<ExpectedTypeWithOptionalObject>()
+    expectTypeOf<PathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>>().toEqualTypeOf<ExpectedType>()
+
+    type TestTypeWithOptionalArray = {
+        optionalProp?: string[]
+    }
+
+    type ExpectedTypeWithOptionalArray = string[] | undefined
+
+    expectTypeOf<PathValue<TestTypeWithOptionalArray, 'optionalProp'>>().toEqualTypeOf<ExpectedTypeWithOptionalArray>()
+    expectTypeOf<PathValue<TestTypeWithOptionalArray, 'optionalProp.0'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with optional (nested) members', () => {
@@ -335,7 +358,8 @@ it('PathValue works with optional (nested) members', () => {
     }
   }
 
-  assertType<string | undefined>(null as unknown as PathValue<TestType, 'optionalProp.stringProp'>)
+    expectTypeOf<PathValue<TestType, 'optionalProp'>>().toEqualTypeOf<{ stringProp: string } | undefined>()
+    expectTypeOf<PathValue<TestType, 'optionalProp.stringProp'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with readonly (nested) members', () => {
@@ -365,10 +389,30 @@ it('PathValue works with readonly (nested) members', () => {
     }
   }
 
-  assertType<{ readonly stringProp: string }>(
-    null as unknown as PathValue<TestTypeObject, 'object'>
-  )
-  assertType<string>(null as unknown as PathValue<TestTypeObject, 'object.stringProp'>)
+    expectTypeOf<PathValue<TestType, 'stringProp'>>().toEqualTypeOf<string>()
+
+    type TestTypeArray = {
+        readonly array: readonly string[]
+    }
+
+    expectTypeOf<PathValue<TestTypeArray, 'array'>>().toEqualTypeOf<readonly string[]>()
+    expectTypeOf<PathValue<TestTypeArray, 'array.0'>>().toEqualTypeOf<string | undefined>()
+
+    type TestTypeTuple = {
+        readonly tuple: readonly ['a', 'b', 'c']
+    }
+
+    expectTypeOf<PathValue<TestTypeTuple, 'tuple'>>().toEqualTypeOf<readonly ['a', 'b', 'c']>()
+    expectTypeOf<PathValue<TestTypeTuple, 'tuple.0'>>().toEqualTypeOf<'a'>()
+
+    type TestTypeObject = {
+        readonly object: {
+            readonly stringProp: string
+        }
+    }
+
+    expectTypeOf<PathValue<TestTypeObject, 'object'>>().toEqualTypeOf<{ readonly stringProp: string }>()
+    expectTypeOf<PathValue<TestTypeObject, 'object.stringProp'>>().toEqualTypeOf<string>()
 })
 
 it('PathValue works with index signatures', () => {
@@ -376,8 +420,8 @@ it('PathValue works with index signatures', () => {
     [index: string]: string
   }
 
-  assertType<string | undefined>(null as unknown as PathValue<TestType, string>)
-  assertType<string | undefined>(null as unknown as PathValue<TestType, number>)
+    expectTypeOf<PathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
+    expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with nested index signatures', () => {
@@ -390,8 +434,9 @@ it('PathValue works with nested index signatures', () => {
     }
   }
 
-  assertType<string | undefined>(null as unknown as PathValue<TestType, `${string}.${string}.a`>)
-  assertType<number | undefined>(null as unknown as PathValue<TestType, `${string}.${string}.b`>)
+    expectTypeOf<PathValue<TestType, `${string}.${string}`>>().toEqualTypeOf<{ a: string; b: number } | undefined>()
+    expectTypeOf<PathValue<TestType, `${string}.${string}.a`>>().toEqualTypeOf<string | undefined>()
+    expectTypeOf<PathValue<TestType, `${string}.${string}.b`>>().toEqualTypeOf<number | undefined>()
 })
 
 it('PathValue works with arrays', () => {
@@ -399,8 +444,8 @@ it('PathValue works with arrays', () => {
     array: string[]
   }
 
-  assertType<string[]>(null as unknown as PathValue<TestType, 'array'>)
-  assertType<string | undefined>(null as unknown as PathValue<TestType, 'array.0'>)
+    expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<string[]>()
+    expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with objects in arrays', () => {
@@ -408,8 +453,9 @@ it('PathValue works with objects in arrays', () => {
     array: { a: string }[]
   }
 
-  assertType<{ a: string }[]>(null as unknown as PathValue<TestType, 'array'>)
-  assertType<string | undefined>(null as unknown as PathValue<TestType, 'array.0.a'>)
+    expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string }[]>()
+    expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<{ a: string } | undefined>()
+    expectTypeOf<PathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
 })
 
 
@@ -417,8 +463,9 @@ it('PathValue works with objects in nullable arrays', () => {
     type TestType = {
         array: { a: string; b: number }[] | null
     }
-    assertType<{ a: string; b: number } | undefined>(null as unknown as PathValue<TestType, 'array.4'>)
-    assertType<string | undefined>(null as unknown as PathValue<TestType, 'array.4.a'>)
+    expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string; b: number }[] | null>()
+    expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<{ a: string; b: number } | undefined>()
+    expectTypeOf<PathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with unions', () => {
@@ -426,14 +473,16 @@ it('PathValue works with unions', () => {
     union: string | number
   }
 
-  assertType<string | number>(null as unknown as PathValue<TestType, 'union'>)
+    expectTypeOf<PathValue<TestType, 'union'>>().toEqualTypeOf<string | number>()
 
-  type TestType2 = {
-    union: string | { a: string }
-  }
+    type TestType2 = {
+        union: string | { a: string }
+    }
 
-  assertType<string | { a: string }>(null as unknown as PathValue<TestType2, 'union'>)
-  assertType<string>(null as unknown as PathValue<TestType2, 'union.a'>)
+    expectTypeOf<PathValue<TestType2, 'union'>>().toEqualTypeOf<string | { a: string }>()
+
+    // TODO: This should be string | undefined
+    expectTypeOf<PathValue<TestType2, 'union.a'>>().toEqualTypeOf<string>()
 })
 
 it('PathValue works with tuples', () => {
@@ -441,8 +490,8 @@ it('PathValue works with tuples', () => {
     tuple: ['a', 'b', 'c']
   }
 
-  assertType<['a', 'b', 'c']>(null as unknown as PathValue<TestType, 'tuple'>)
-  assertType<'a'>(null as unknown as PathValue<TestType, 'tuple.0'>)
+    expectTypeOf<PathValue<TestType, 'tuple'>>().toEqualTypeOf<['a', 'b', 'c']>()
+    expectTypeOf<PathValue<TestType, 'tuple.0'>>().toEqualTypeOf<'a'>()
 })
 
 it('PathValue works with objects in tuples', () => {
@@ -450,6 +499,9 @@ it('PathValue works with objects in tuples', () => {
     tuple: [{ a: string }, 'b']
   }
 
-  assertType<{ a: string }>(null as unknown as PathValue<TestType, 'tuple.0'>)
-  assertType<string>(null as unknown as PathValue<TestType, 'tuple.0.a'>)
+    expectTypeOf<PathValue<TestType, 'tuple.0'>>().toEqualTypeOf<{ a: string }>()
+    expectTypeOf<PathValue<TestType, 'tuple.0.a'>>().toEqualTypeOf<string>()
+
+    // @ts-expect-error - 1 is 'b' not { a: string }
+    expectTypeOf<PathValue<TestType, 'tuple.1.a'>>().toEqualTypeOf<string>()
 })
