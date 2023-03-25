@@ -91,11 +91,16 @@ type TupleLength<T> = T extends { length: infer L } ? (L extends number ? L : ne
 type TupleElement<T, N> = N extends keyof T ? T[N] : never
 
 // get all numbers from 0 to L
-type NumbersToZero<L extends number, Depth extends number> = Depth extends 0
+type NumbersToZero<
+  IterationCarry extends unknown[],
+  DepthCarry extends unknown[]
+> = TupleLength<DepthCarry> extends 0
   ? never
-  : L extends -1
+  : TupleLength<IterationCarry> extends 0
   ? never
-  : NumbersToZero<MinusOne<L>, MinusOne<Depth>> | L
+  :
+      | NumbersToZero<MinusOne<IterationCarry>, MinusOne<IterationCarry>>
+      | TupleLength<MinusOne<IterationCarry>>
 
 // possible recod keys
 type RecordKeys = string | number | symbol
@@ -108,44 +113,53 @@ type Writeable<T> = {
 /* -------------------------------------------------------------------------- */
 /*                                 Math Types                                 */
 /* -------------------------------------------------------------------------- */
-// sourced from https://stackoverflow.com/a/75419300/15279490
+// We use a tuple to carry our value
 
-type Length<T extends unknown[]> = T extends { length: infer L } ? L : never
+type MinusOne<N extends unknown[]> = N extends [...infer U, unknown] ? U : never
+
 type BuildTuple<L extends number, T extends unknown[] = []> = T extends { length: L }
   ? T
   : BuildTuple<L, [...T, unknown]>
-type MinusOne<N extends number> = BuildTuple<N> extends [...infer U, unknown] ? Length<U> : never
 
 /* -------------------------------------------------------------------------- */
 /*                                 Path Types                                 */
 /* -------------------------------------------------------------------------- */
 
 // get all possible paths of a type
-type GetRecordPaths<T, Depth extends number, K extends keyof T = keyof T> = K extends keyof T
-  ? RemoveInvalidDotPathKeys<K> | `${RemoveInvalidDotPathKeys<K>}.${Path<T[K], Depth>}`
+type GetRecordPaths<
+  T,
+  DepthCarry extends unknown[],
+  K extends keyof T = keyof T
+> = K extends keyof T
+  ? RemoveInvalidDotPathKeys<K> | `${RemoveInvalidDotPathKeys<K>}.${Path<T[K], DepthCarry>}`
   : never
 
 // get all possible paths of an array
-type GetArrayPaths<T, Depth extends number> = `${number}.${Path<GetArrayElement<T>, Depth>}`
+type GetArrayPaths<T, DepthCarry extends unknown[]> = `${number}.${Path<
+  GetArrayElement<T>,
+  DepthCarry
+>}`
 
 // get all possible paths of a tuple
-type GetTuplePaths<T, Depth extends number> = NumbersToZero<
-  MinusOne<TupleLength<T>>,
-  Depth
+type GetTuplePaths<T extends unknown[], DepthCarry extends unknown[]> = NumbersToZero<
+  MinusOne<T>,
+  DepthCarry
 > extends infer R
   ? R extends number
-    ? R | `${R}.${Path<TupleElement<T, R>, Depth>}`
+    ? R | `${R}.${Path<TupleElement<T, R>, DepthCarry>}`
     : never
   : never
 
-type PathStep<T, Depth extends number> = IsAny<T> extends true
+type PathStep<T, Depth extends unknown[]> = IsAny<T> extends true
   ? string
   : IsUnknown<T> extends true
   ? never
   : IsPrimitive<T> extends true
   ? never
   : IsTuple<T> extends true
-  ? GetTuplePaths<T, Depth>
+  ? T extends unknown[]
+    ? GetTuplePaths<T, Depth>
+    : never
   : IsArray<T> extends true
   ? number | GetArrayPaths<T, Depth>
   : HasIndexSignature<T> extends true
@@ -153,11 +167,13 @@ type PathStep<T, Depth extends number> = IsAny<T> extends true
   : GetRecordPaths<T, Depth>
 
 // Final path type
-type Path<T, Depth extends number = 25> = Depth extends 0
+type Path<T, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
   ? never
   : T extends T
-  ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<Depth>>
+  ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<DepthCarry>>
   : never
+
+type PathEntry<T, Depth extends number = 25> = Path<T, BuildTuple<Depth>>
 
 type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true
   ? any
@@ -183,14 +199,18 @@ type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true
   : never
 
 // nearly same function as PathValueEntry, but without constraints for P so it is easier to use in PathValueStep
-type PathValue<T, P, Depth extends number = 25> = Depth extends 0
+type PathValue<T, P, DepthCarry extends number = 25> = DepthCarry extends 0
   ? never
   : T extends T
-  ? PathValueStep<Writeable<T>, P, Depth>
+  ? PathValueStep<Writeable<T>, P, DepthCarry>
   : never
 
 // final path value type
-type PathValueEntry<T, P extends Path<T, Depth>, Depth extends number = 25> = PathValue<T, P, Depth>
+type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 25> = PathValue<
+  T,
+  P,
+  Depth
+>
 
 /**
  * Retrives a value from an object by dot notation
@@ -198,7 +218,7 @@ type PathValueEntry<T, P extends Path<T, Depth>, Depth extends number = 25> = Pa
  * @param obj - object to get value from
  * @param path - path to value
  */
-function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends Path<T, 25>>(
+function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends PathEntry<T, 25>>(
   object: T,
   path: P
 ): PathValueEntry<T, P, 25> {
@@ -212,7 +232,7 @@ function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends 
 
 function setByPath<
   T extends Record<RecordKeys, unknown> | unknown[],
-  P extends Path<T, 25>,
+  P extends PathEntry<T, 25>,
   V extends PathValueEntry<T, P, 25>
 >(object: T, path: P, value: V): void {
   const pathArray = (path as string).split('.')
@@ -234,6 +254,6 @@ function setByPath<
   objectToSet[lastKey] = value
 }
 
-export type { Path, PathValueEntry as PathValue }
+export type { PathEntry as Path, PathValueEntry as PathValue }
 
 export { getByPath, setByPath }
