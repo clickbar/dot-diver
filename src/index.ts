@@ -171,48 +171,52 @@ type PathStep<T, Depth extends unknown[]> = IsAny<T> extends true
 
 // Final path type
 type Path<T, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
-  ? any
+  ? IsPrimitive<T> extends true
+    ? never
+    : any
   : T extends T
   ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<DepthCarry>>
   : never
 
 type PathEntry<T, Depth extends number = 25> = Path<T, BuildTuple<Depth>>
 
-type PathValueStep<T, P, Depth extends number> = IsAny<T> extends true
+type PathValueStep<T, P, DepthCarry extends unknown[]> = IsAny<T> extends true
   ? any
   : IsUnknown<T> extends true
   ? unknown
   : IsNullableOrUndefineable<T> extends true
-  ? PathValueStep<ExcludeNullUndefined<T>, P, Depth> | undefined
+  ? PathValue<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
   : IsTuple<T> extends true
   ? P extends `${infer H}.${infer R}`
-    ? PathValueStep<TupleElement<T, H>, R, Depth>
+    ? PathValue<TupleElement<T, H>, R, DepthCarry>
     : TupleElement<T, P>
   : IsArray<T> extends true
   ? // eslint-disable-next-line @typescript-eslint/no-unused-vars
     P extends `${infer _H}.${infer R}`
-    ? PathValueStep<GetArrayElement<T>, R, Depth> | undefined
+    ? PathValue<GetArrayElement<T>, R, DepthCarry> | undefined
     : GetArrayElement<T> | undefined
   : P extends `${infer H}.${infer R}`
   ? H extends keyof T
-    ? PathValue<T[H], R, Depth> | (HasIndexSignature<T> extends true ? undefined : never)
+    ? PathValue<T[H], R, DepthCarry> | (HasIndexSignature<T> extends true ? undefined : never)
     : never
   : P extends keyof T
   ? T[P] | (HasIndexSignature<T> extends true ? undefined : never)
   : never
 
 // nearly same function as PathValueEntry, but without constraints for P so it is easier to use in PathValueStep
-type PathValue<T, P, DepthCarry extends number = 25> = DepthCarry extends 0
-  ? never
+type PathValue<T, P, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
+  ? IsPrimitive<T> extends true
+    ? never
+    : unknown
   : T extends T
-  ? PathValueStep<Writeable<T>, P, DepthCarry>
+  ? PathValueStep<Writeable<T>, P, MinusOne<DepthCarry>>
   : never
 
 // final path value type
 type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 25> = PathValue<
   T,
   P,
-  Depth
+  BuildTuple<Depth>
 >
 
 /**
