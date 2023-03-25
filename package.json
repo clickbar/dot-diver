@@ -15,7 +15,9 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "vite build && tsc"
+    "build": "vite build && tsc",
+    "lint": "eslint ./ --ext=js,ts",
+    "fix": "eslint ./ --ext=js,ts --fix"
   },
   "keywords": [
     "ts",

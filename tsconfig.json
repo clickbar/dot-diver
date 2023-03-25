@@ -3,7 +3,10 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "moduleResolution": "bundler",
     "strict": true,
     "resolveJsonModule": true,
@@ -18,5 +21,9 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "include": ["src", "test"]
+  "include": [
+    "src",
+    "test",
+    "vite.config.ts"
+  ]
 }
