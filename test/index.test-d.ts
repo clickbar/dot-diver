@@ -510,11 +510,17 @@ it('PathValue works with objects in nullable arrays', () => {
   type TestType = {
     array: { a: string; b: number }[] | null
   }
+
   expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string; b: number }[] | null>()
+
   expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<
     { a: string; b: number } | undefined
   >()
+
   expectTypeOf<PathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
+
+  // @ts-expect-error - c is not a property of { a: string; b: number }
+  expectTypeOf<PathValue<TestType, 'array.0.c'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with unions', () => {
