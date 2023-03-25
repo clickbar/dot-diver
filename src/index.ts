@@ -218,7 +218,7 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 25>
 /**
  * Retrives a value from an object by dot notation
  *
- * @param obj - object to get value from
+ * @param object - object to get value from
  * @param path - path to value
  */
 function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends PathEntry<T, 25>>(
@@ -233,6 +233,12 @@ function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends 
   ) as PathValueEntry<T, P, 25>
 }
 
+/**
+ * Sets a value in an object by dot notation
+ * @param object - object to set value in
+ * @param path - path to value
+ * @param value - value to set
+ */
 function setByPath<
   T extends Record<RecordKeys, unknown> | unknown[],
   P extends PathEntry<T, 25>,
