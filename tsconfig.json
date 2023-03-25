@@ -19,7 +19,8 @@
     "skipLibCheck": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "outDir": "dist"
+    "declarationMap": true,
+    "declarationDir": "dist"
   },
   "include": [
     "src",

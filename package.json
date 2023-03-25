@@ -2,11 +2,11 @@
   "name": "@clickbar/dot-diver",
   "version": "1.0.0",
   "description": "Types and utilities to access object properties by dot notation.",
+  "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
