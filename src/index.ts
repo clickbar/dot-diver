@@ -105,9 +105,6 @@ type NumbersToZero<
       | NumbersToZero<MinusOne<IterationCarry>, MinusOne<DepthCarry>>
       | TupleLength<MinusOne<IterationCarry>>
 
-// possible record keys
-type RecordKeys = string | number | symbol
-
 // remove readonly from members of a record
 type Writeable<T> = {
   -readonly [K in keyof T]: T[K]
@@ -219,7 +216,7 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 25>
   BuildTuple<Depth>
 >
 
-type SearchableObject = Record<RecordKeys, unknown> | unknown[]
+type SearchableObject = Record<never, never> | unknown[]
 
 /**
  * Retrives a value from an object by dot notation
