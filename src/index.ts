@@ -219,13 +219,15 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 25>
   BuildTuple<Depth>
 >
 
+type SearchableObject = Record<RecordKeys, unknown> | unknown[]
+
 /**
  * Retrives a value from an object by dot notation
  *
  * @param object - object to get value from
  * @param path - path to value
  */
-function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends PathEntry<T, 25>>(
+function getByPath<T extends SearchableObject, P extends PathEntry<T, 25>>(
   object: T,
   path: P
 ): PathValueEntry<T, P, 25> {
@@ -244,7 +246,7 @@ function getByPath<T extends Record<RecordKeys, unknown> | unknown[], P extends 
  * @param value - value to set
  */
 function setByPath<
-  T extends Record<RecordKeys, unknown> | unknown[],
+  T extends SearchableObject,
   P extends PathEntry<T, 25>,
   V extends PathValueEntry<T, P, 25>
 >(object: T, path: P, value: V): void {
@@ -267,6 +269,6 @@ function setByPath<
   objectToSet[lastKey] = value
 }
 
-export type { PathEntry as Path, PathValueEntry as PathValue }
+export type { PathEntry as Path, PathValueEntry as PathValue, SearchableObject }
 
 export { getByPath, setByPath }
