@@ -6,15 +6,15 @@ Dot notation is a popular and convenient way to access deeply nested properties 
 
 ## 📑 Table of Contents
 
-- [🌟 Features](#🌟-features)
-- [📦 Installation](#📦-installation)
-- [🚀 Usage](#🚀-usage)
-  - [🔎 `getByPath` and 🔏 `setByPath`](#🔎-getbypath-and-🔏-setbypath)
-  - [🛣️ Path and 🔖 PathValue](#🛣️-path-and-🔖-pathvalue)
-  - [🔄 Objects with cyclic dependency](#🔄-objects-with-cyclic-dependency)
-- [❓ FAQ](#❓-faq)
-- [👨‍💻 Contributing](#👨‍💻-contributing)
-- [📄 License](#📄-license)
+- [🌟 Features](#-features)
+- [📦 Installation](#-installation)
+- [🚀 Usage](#-usage)
+  - [🔎 `getByPath` and 🔏 `setByPath`](#-getbypath-and--setbypath)
+  - [🛣️ Path and 🔖 PathValue](#%EF%B8%8F-path-and--pathvalue)
+  - [🔄 Objects with cyclic dependency](#-objects-with-cyclic-dependency)
+- [❓ FAQ](#-faq)
+- [👨‍💻 Contributing](#-contributing)
+- [📄 License](#-license)
 
 <br>
 <br>
