@@ -49,6 +49,9 @@ type RemoveInvalidDotPathKeys<T> = T extends symbol
 // check if a type is an array
 type IsArray<T> = T extends Array<any> ? true : false
 
+// check if a array is empty
+type IsEmptyArray<T> = T extends [] ? true : false
+
 // Get the type of an array element
 type GetArrayElement<T> = T extends Array<infer U> ? U : never
 
@@ -95,14 +98,14 @@ type NumbersToZero<
   IterationCarry extends unknown[],
   DepthCarry extends unknown[]
 > = TupleLength<DepthCarry> extends 0
-  ? never
+  ? any
   : TupleLength<IterationCarry> extends 0
   ? never
   :
-      | NumbersToZero<MinusOne<IterationCarry>, MinusOne<IterationCarry>>
+      | NumbersToZero<MinusOne<IterationCarry>, MinusOne<DepthCarry>>
       | TupleLength<MinusOne<IterationCarry>>
 
-// possible recod keys
+// possible record keys
 type RecordKeys = string | number | symbol
 
 // remove readonly from members of a record
@@ -142,7 +145,7 @@ type GetArrayPaths<T, DepthCarry extends unknown[]> = `${number}.${Path<
 
 // get all possible paths of a tuple
 type GetTuplePaths<T extends unknown[], DepthCarry extends unknown[]> = NumbersToZero<
-  MinusOne<T>,
+  T,
   DepthCarry
 > extends infer R
   ? R extends number
@@ -161,14 +164,14 @@ type PathStep<T, Depth extends unknown[]> = IsAny<T> extends true
     ? GetTuplePaths<T, Depth>
     : never
   : IsArray<T> extends true
-  ? number | GetArrayPaths<T, Depth>
+  ? (IsEmptyArray<T> extends true ? never : number) | GetArrayPaths<T, Depth>
   : HasIndexSignature<T> extends true
   ? GetValidIndexSignature<T> | GetRecordPaths<RemoveIndexSignature<T>, Depth>
   : GetRecordPaths<T, Depth>
 
 // Final path type
 type Path<T, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
-  ? never
+  ? any
   : T extends T
   ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<DepthCarry>>
   : never
