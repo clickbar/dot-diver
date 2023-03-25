@@ -16,6 +16,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "vite build && tsc",
+    "test": "vitest run && vitest typecheck --run",
     "lint": "eslint ./ --ext=js,ts",
     "fix": "eslint ./ --ext=js,ts --fix"
   },
