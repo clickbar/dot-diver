@@ -89,6 +89,16 @@ it('Arrays can be accessed with number', () => {
   assertType<'array' | `array.0`>(null as unknown as Path<typeof testObject>)
 })
 
+it('nullable arrays can be accessed with number', () => {
+    type TestType = {
+        array: { a: string; b: number }[] | null
+    }
+
+    type ExpectedType = 'array' | `array.${number}` | `array.${number}.a` | `array.${number}.b`
+
+    assertType<ExpectedType>(null as unknown as Path<TestType>)
+})
+
 /* -------------------------------------------------------------------------- */
 /*                                Tuples Tests                                */
 /* -------------------------------------------------------------------------- */
@@ -400,6 +410,15 @@ it('PathValue works with objects in arrays', () => {
 
   assertType<{ a: string }[]>(null as unknown as PathValue<TestType, 'array'>)
   assertType<string | undefined>(null as unknown as PathValue<TestType, 'array.0.a'>)
+})
+
+
+it('PathValue works with objects in nullable arrays', () => {
+    type TestType = {
+        array: { a: string; b: number }[] | null
+    }
+    assertType<{ a: string; b: number } | undefined>(null as unknown as PathValue<TestType, 'array.4'>)
+    assertType<string | undefined>(null as unknown as PathValue<TestType, 'array.4.a'>)
 })
 
 it('PathValue works with unions', () => {
