@@ -41,19 +41,19 @@ Install the package using your favorite package manager:
 npm
 
 ```sh
-npm install -D dot-diver
+npm install -D @clickbar/dot-diver
 ```
 
 yarn
 
 ```sh
-yarn add -D dot-diver
+yarn add -D @clickbar/dot-diver
 ```
 
 pnpm
 
 ```sh
-pnpm install -D dot-diver
+pnpm install -D @clickbar/dot-diver
 ```
 
 <br>
@@ -71,7 +71,7 @@ pnpm install -D dot-diver
 <br>
 
 ```ts
-import { getByPath, setByPath } from 'dot-diver';
+import { getByPath, setByPath } from '@clickbar/dot-diver';
 
 // Define a sample object with nested properties
 const object = {
@@ -126,7 +126,7 @@ console.log(object.f[1].g) // Output: 'new array-item-2'
 <br>
 
 ```typescript
-import type { Path, PathValue } from 'dot-diver'
+import type { Path, PathValue } from '@clickbar/dot-diver'
 
 // Define a sample object type with nested properties
 type MyObjectType = {
@@ -162,7 +162,7 @@ type ValueAtPathF_0_G = PathValue<MyObjectType, 'f.0.g'> // Output: string
 <br>
 
 ```typescript
-import type { Path, PathValue } from 'dot-diver'
+import type { Path, PathValue } from '@clickbar/dot-diver'
 
 // Define an object type with nested properties and a cyclic dependency
 type Node = {
@@ -200,7 +200,7 @@ Example:
 <br>
 
 ```typescript
-import { getByPath, setByPath } from 'dot-diver'
+import { getByPath, setByPath } from '@clickbar/dot-diver'
 
 import type { Path, SearchableObject, PathValue } from 'dot-diver'
 
