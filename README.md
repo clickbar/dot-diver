@@ -263,6 +263,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 <br>
 
+## 🔒 Security Vulnerabilities
+
+Please see [SECURITY](SECURITY.md) for details.
+
+<br>
+
 ## 📄 License
 
 Dot Diver is licensed under the [MIT License](LICENSE.md).
