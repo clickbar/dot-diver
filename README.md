@@ -204,7 +204,7 @@ function setByPathDepth10<
   P extends Path<T, 10> & string,
   V extends PathValue<T, P, 10>
 >(object: T, path: P, value: V): void {
-  setByPath(object, path, value as PathValue<T, P, 25>)
+  setByPath(object, path, value as PathValue<T, P, 10>)
 }
 
 export { getByPathDepth10 as getByPath, setByPathDepth10 as setByPath }
