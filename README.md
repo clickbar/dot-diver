@@ -245,7 +245,7 @@ type TestType = {
 ```
 
 You can try to decrease the depth limit of the auto completion by reimplementing the `getByPath` and `setByPath` functions.
-See [this section](#customizing-the-depth-limit) for customizing the depth limit.
+See [this section](#%EF%B8%8F-customizing-the-depth-limit) for customizing the depth limit.
 
 <br>
 
