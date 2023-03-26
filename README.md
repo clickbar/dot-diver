@@ -259,6 +259,8 @@ See [this section](#%EF%B8%8F-customizing-the-depth-limit) for customizing the d
 
 If you would like to contribute to Dot Diver, feel free to fork the repository, make changes, and submit a pull request. We appreciate any help and feedback.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+
 <br>
 
 ## 📄 License
