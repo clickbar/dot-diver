@@ -6,6 +6,8 @@ Dot notation is a popular and convenient way to access deeply nested properties 
 
 Example:
 ```typescript
+import { getByPath } from '@clickbar/dot-diver'
+
 const object = {
   a: 'Hello world',
 }
@@ -58,7 +60,7 @@ pnpm install -D @clickbar/dot-diver
 <br>
 
 ```ts
-import { getByPath, setByPath } from '@clickbar/dot-diver';
+import { getByPath, setByPath } from '@clickbar/dot-diver'
 
 // Define a sample object with nested properties
 const object = {
