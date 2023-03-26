@@ -560,3 +560,15 @@ it('PathValue works with objects in tuples', () => {
   // @ts-expect-error - 1 is 'b' not { a: string }
   expectTypeOf<PathValue<TestType, 'tuple.1.a'>>().toEqualTypeOf<string>()
 })
+
+it('PathValue works with multi-dimensional arrays', () => {
+  type TestType = string[][][]
+
+  expectTypeOf<PathValue<TestType, '0.0.0'>>().toEqualTypeOf<string | undefined>()
+
+  type TestType2 = {
+    array: { a: string }[][]
+  }
+
+  expectTypeOf<PathValue<TestType2, 'array.0.0.a'>>().toEqualTypeOf<string | undefined>()
+})
