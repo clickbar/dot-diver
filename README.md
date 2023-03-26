@@ -171,7 +171,7 @@ type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Out
 type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
 ```
 
-The default depth is currently *25*.\
+The default depth is currently **25**.\
 At the moment, it is not possible to customize it when using the provided `getByPath` and `setByPath` functions.
 This is further explained in this [issue](https://github.com/clickbar/dot-diver/issues/1).
 
@@ -180,7 +180,7 @@ This is further explained in this [issue](https://github.com/clickbar/dot-diver/
 
 ### ⚙️ Customizing the Depth Limit
 
-U can still customize it, by implementing your own functions, which just calls ours.
+You can still customize it, by implementing your own functions, which just calls ours.
 Example:
 
 <br>
