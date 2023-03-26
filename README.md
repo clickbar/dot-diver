@@ -4,19 +4,14 @@ A lightweight, powerful, and dependency-free TypeScript utility library that pro
 
 Dot notation is a popular and convenient way to access deeply nested properties in objects. With Dot Diver, you can safely work with object paths in TypeScript projects, ensuring type correctness and productivity!
 
-## 📑 Table of Contents
+Example:
+```typescript
+const object = {
+  a: 'Hello world',
+}
 
-- [🌟 Features](#-features)
-- [📦 Installation](#-installation)
-- [🚀 Usage](#-usage)
-  - [🔎 `getByPath` and 🔏 `setByPath`](#-getbypath-and--setbypath)
-  - [🛣️ Path and 🔖 PathValue](#%EF%B8%8F-path-and--pathvalue)
-  - [🔄 Objects with cyclic dependency](#-objects-with-cyclic-dependency)
-- [❓ FAQ](#-faq)
-- [👨‍💻 Contributing](#-contributing)
-- [📄 License](#-license)
-
-<br>
+const result = getByPath(object, 'a') // result is 'Hello world'
+```
 <br>
 
 ## 🌟 Features
@@ -165,10 +160,9 @@ type Node = {
 }
 
 // Example 1: Using the Path type with a Depth limit
-typ
-e NodePathsDepth3 = Path<Node, 2> // Depth limit of 2
+type NodePathsDepth2 = Path<Node, 2> // Depth limit of 2
 
-// NodePathsDepth3 will be a union type representing all valid paths in dot notation up to a depth of 3:
+// NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 3:
 // 'id' | 'label' | 'parent' | 'children' | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.${any}` | `parent.children.${any}` | `children.${number}` | `children.${number}.${any}`
 
 // Example 2: Using the PathValue type with a Depth limit
