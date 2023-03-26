@@ -263,7 +263,7 @@ If you would like to contribute to Dot Diver, feel free to fork the repository, 
 
 ## 📄 License
 
-Dot Diver is licensed under the [MIT License](LICENSE).
+Dot Diver is licensed under the [MIT License](LICENSE.md).
 
 <br>
 
