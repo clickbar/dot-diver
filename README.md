@@ -173,7 +173,7 @@ type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Out
 type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
 ```
 
-The default depth is currently **25**.\
+The default depth is currently **10**.\
 At the moment, it is not possible to customize it when using the provided `getByPath` and `setByPath` functions.
 This is further explained in this [issue](https://github.com/clickbar/dot-diver/issues/1).
 
@@ -192,19 +192,19 @@ import { getByPath, setByPath } from '@clickbar/dot-diver'
 
 import type { Path, SearchableObject, PathValue } from '@clickbar/dot-diver'
 
-function getByPathDepth10<T extends SearchableObject, P extends Path<T, 10> & string>(
+function getByPathDepth10<T extends SearchableObject, P extends Path<T, 5> & string>(
   object: T,
   path: P
-): PathValue<T, P, 10> {
-  return getByPath(object, path) as PathValue<T, P, 10>
+): PathValue<T, P, 5> {
+  return getByPath(object, path) as PathValue<T, P, 5>
 }
 
 function setByPathDepth10<
   T extends SearchableObject,
-  P extends Path<T, 10> & string,
-  V extends PathValue<T, P, 10>
+  P extends Path<T, 5> & string,
+  V extends PathValue<T, P, 5>
 >(object: T, path: P, value: V): void {
-  setByPath(object, path, value as PathValue<T, P, 25>)
+  setByPath(object, path, value as PathValue<T, P, 10>)
 }
 
 export { getByPathDepth10 as getByPath, setByPathDepth10 as setByPath }

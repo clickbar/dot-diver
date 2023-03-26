@@ -334,12 +334,6 @@ it('Cyclic dependencies are handled correctly', () => {
     a: TestType
   }
 
-  // @ts-expect-error - the default depth limit is to high for this number of recursions
-  type Result = Path<TestType>
-
-  expectTypeOf<Result>().toEqualTypeOf<Path<TestType>>()
-
-  // It works with a reduced depth limit
   type DepthLimitedResult = Path<TestType, 3>
 
   expectTypeOf<DepthLimitedResult>().toEqualTypeOf<Path<TestType, 3>>()

@@ -175,7 +175,7 @@ type Path<T, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
   ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<DepthCarry>>
   : never
 
-type PathEntry<T, Depth extends number = 25> = Path<T, BuildTuple<Depth>>
+type PathEntry<T, Depth extends number = 10> = Path<T, BuildTuple<Depth>>
 
 type PathValueStep<T, P, DepthCarry extends unknown[]> = IsAny<T> extends true
   ? any
@@ -210,7 +210,7 @@ type PathValue<T, P, DepthCarry extends unknown[]> = TupleLength<DepthCarry> ext
   : never
 
 // final path value type
-type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 25> = PathValue<
+type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10> = PathValue<
   T,
   P,
   BuildTuple<Depth>
@@ -225,14 +225,14 @@ type SearchableObject = Record<never, never> | unknown[]
  * @param path - path to value
  *
  * @privateRemarks
- * The intersection between PathEntry<T, 25>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
- * Without the intersection, the path would just be of type PathEntry<T, 25> and PathValueEntry would be a union of all possible return types.
+ * The intersection between PathEntry<T, 10>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
+ * Without the intersection, the path would just be of type PathEntry<T, 10> and PathValueEntry would be a union of all possible return types.
  * By using the intersection, TypeScript is forced to apply the PathEntry constraints and infer the type from the provided user input.
  */
-function getByPath<T extends SearchableObject, P extends PathEntry<T, 25> & string>(
+function getByPath<T extends SearchableObject, P extends PathEntry<T, 10> & string>(
   object: T,
   path: P
-): PathValueEntry<T, P, 25> {
+): PathValueEntry<T, P, 10> {
   const pathArray = (path as string).split('.')
 
   return pathArray.reduce((accumulator: any, current) => accumulator?.[current], object) as any
@@ -245,14 +245,14 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T, 25> & stri
  * @param value - value to set
  *
  * @privateRemarks
- * The intersection between PathEntry<T, 25>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
- * Without the intersection, the path would just be of type PathEntry<T, 25> and PathValueEntry would be a union of all possible return types.
+ * The intersection between PathEntry<T, 10>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
+ * Without the intersection, the path would just be of type PathEntry<T, 10> and PathValueEntry would be a union of all possible return types.
  * By using the intersection, TypeScript is forced to apply the PathEntry constraints and infer the type from the provided user input.
  */
 function setByPath<
   T extends SearchableObject,
-  P extends PathEntry<T, 25> & string,
-  V extends PathValueEntry<T, P, 25>
+  P extends PathEntry<T, 10> & string,
+  V extends PathValueEntry<T, P, 10>
 >(object: T, path: P, value: V): void {
   const pathArray = (path as string).split('.')
   const lastKey = pathArray.pop()
