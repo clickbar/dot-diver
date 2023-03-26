@@ -1,0 +1,35 @@
+name: Fix styling
+
+on: [push]
+
+jobs:
+  fix-styling:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
+          node-version: '18'
+
+      # Skip post-install scripts here, as a malicious
+      # script could steal NODE_AUTH_TOKEN.
+      - run: pnpm install --ignore-scripts
+
+      # `pnpm rebuild` will run all those post-install scripts for us.
+      - run: pnpm rebuild && pnpm run --if-present prepare
+
+      - run: pnpm fix
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Fix styling
