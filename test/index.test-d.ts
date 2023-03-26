@@ -536,7 +536,6 @@ it('PathValue works with unions', () => {
 
   expectTypeOf<PathValue<TestType2, 'union'>>().toEqualTypeOf<string | { a: string }>()
 
-  // TODO: This should be string | undefined
   expectTypeOf<PathValue<TestType2, 'union.a'>>().toEqualTypeOf<string>()
 })
 
