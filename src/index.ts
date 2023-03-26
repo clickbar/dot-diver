@@ -226,7 +226,7 @@ type SearchableObject = Record<never, never> | unknown[]
  */
 function getByPath<T extends SearchableObject, P extends PathEntry<T, 25>>(
   object: T,
-  path: P
+  path: [P] extends [never] ? string : P // TODO: Why is this needed?
 ): PathValueEntry<T, P, 25> {
   const pathArray = (path as string).split('.')
 
@@ -246,7 +246,11 @@ function setByPath<
   T extends SearchableObject,
   P extends PathEntry<T, 25>,
   V extends PathValueEntry<T, P, 25>
->(object: T, path: P, value: V): void {
+>(
+  object: T,
+  path: [P] extends [never] ? string : P, // TODO: Why is this needed?
+  value: V
+): void {
   const pathArray = (path as string).split('.')
   const lastKey = pathArray.pop()
 
