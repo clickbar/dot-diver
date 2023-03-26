@@ -210,7 +210,7 @@ function setByPathDepth10<
 export { getByPathDepth10 as getByPath, setByPathDepth10 as setByPath }
 ```
 
-The intersection between `Path<T, 10>` and `string` is necessary for TypeScript to successfully narrow down the type of `P` based on the user-provided `path` input.
+The intersection between `Path<T, 5>` and `string` is necessary for TypeScript to successfully narrow down the type of `P` based on the user-provided `path` input.
 Without the intersection, the `path` would just be of type `Path<T, 10>` and `PathValueEntry` would be a union of all possible return types.
 By using the intersection, TypeScript is forced to apply the `Path` constraints and infer the type from the provided user input.
 
