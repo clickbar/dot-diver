@@ -188,9 +188,9 @@ Example:
 ```typescript
 import { getByPath, setByPath } from '@clickbar/dot-diver'
 
-import type { Path, SearchableObject, PathValue } from 'dot-diver'
+import type { Path, SearchableObject, PathValue } from '@clickbar/dot-diver'
 
-function getByPathDepth10<T extends SearchableObject, P extends Path<T, 10>>(
+function getByPathDepth10<T extends SearchableObject, P extends Path<T, 10> & string>(
   object: T,
   path: P
 ): PathValue<T, P, 10> {
@@ -199,7 +199,7 @@ function getByPathDepth10<T extends SearchableObject, P extends Path<T, 10>>(
 
 function setByPathDepth10<
   T extends SearchableObject,
-  P extends Path<T, 10>,
+  P extends Path<T, 10> & string,
   V extends PathValue<T, P, 10>
 >(object: T, path: P, value: V): void {
   setByPath(object, path, value as PathValue<T, P, 25>)
@@ -207,6 +207,10 @@ function setByPathDepth10<
 
 export { getByPathDepth10 as getByPath, setByPathDepth10 as setByPath }
 ```
+
+The intersection between `Path<T, 10>` and `string` is necessary for TypeScript to successfully narrow down the type of `P` based on the user-provided `path` input.
+Without the intersection, the `path` would just be of type `Path<T, 10>` and `PathValueEntry` would be a union of all possible return types.
+By using the intersection, TypeScript is forced to apply the `Path` constraints and infer the type from the provided user input.
 
 <br>
 <br>

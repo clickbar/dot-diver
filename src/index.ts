@@ -223,17 +223,19 @@ type SearchableObject = Record<never, never> | unknown[]
  *
  * @param object - object to get value from
  * @param path - path to value
+ *
+ * @privateRemarks
+ * The intersection between PathEntry<T, 25>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
+ * Without the intersection, the path would just be of type PathEntry<T, 25> and PathValueEntry would be a union of all possible return types.
+ * By using the intersection, TypeScript is forced to apply the PathEntry constraints and infer the type from the provided user input.
  */
-function getByPath<T extends SearchableObject, P extends PathEntry<T, 25>>(
+function getByPath<T extends SearchableObject, P extends PathEntry<T, 25> & string>(
   object: T,
-  path: [P] extends [never] ? string : P // TODO: Why is this needed?
+  path: P
 ): PathValueEntry<T, P, 25> {
   const pathArray = (path as string).split('.')
 
-  return pathArray.reduce(
-    (accumulator: any, current) => accumulator?.[current],
-    object
-  ) as PathValueEntry<T, P, 25>
+  return pathArray.reduce((accumulator: any, current) => accumulator?.[current], object) as any
 }
 
 /**
@@ -241,16 +243,17 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T, 25>>(
  * @param object - object to set value in
  * @param path - path to value
  * @param value - value to set
+ *
+ * @privateRemarks
+ * The intersection between PathEntry<T, 25>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
+ * Without the intersection, the path would just be of type PathEntry<T, 25> and PathValueEntry would be a union of all possible return types.
+ * By using the intersection, TypeScript is forced to apply the PathEntry constraints and infer the type from the provided user input.
  */
 function setByPath<
   T extends SearchableObject,
-  P extends PathEntry<T, 25>,
+  P extends PathEntry<T, 25> & string,
   V extends PathValueEntry<T, P, 25>
->(
-  object: T,
-  path: [P] extends [never] ? string : P, // TODO: Why is this needed?
-  value: V
-): void {
+>(object: T, path: P, value: V): void {
   const pathArray = (path as string).split('.')
   const lastKey = pathArray.pop()
 
