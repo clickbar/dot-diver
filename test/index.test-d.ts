@@ -571,3 +571,86 @@ it('PathValue works with multi-dimensional arrays', () => {
 
   expectTypeOf<PathValue<TestType2, 'array.0.0.a'>>().toEqualTypeOf<string | undefined>()
 })
+
+/* -------------------------------------------------------------------------- */
+/*                                Readme Tests                                */
+/* -------------------------------------------------------------------------- */
+
+it('Test readme usage example: 🛣️ Path and 🔖 PathValue', () => {
+  // Define a sample object type with nested properties
+  type MyObjectType = {
+    a: string
+    b: {
+      c: number
+      d: {
+        e: boolean
+      }
+    }
+    f: [{ g: string }, { g: string }]
+  }
+
+  // Example 1: Using the Path type
+  type MyObjectPaths = Path<MyObjectType>
+
+  // MyObjectPaths will be a union type representing all valid paths in dot notation:
+  // 'a' | 'b' | 'f' | 'b.c' | 'b.d' | 'b.d.e' | 'f.0' | 'f.1' | 'f.0.g' | 'f.1.g'
+  expectTypeOf<MyObjectPaths>().toEqualTypeOf<
+    'a' | 'b' | 'f' | 'b.c' | 'b.d' | 'b.d.e' | 'f.0' | 'f.1' | 'f.0.g' | 'f.1.g'
+  >()
+
+  // Example 2: Using the PathValue type
+  type ValueAtPathA = PathValue<MyObjectType, 'a'> // Output: string
+  expectTypeOf<ValueAtPathA>().toEqualTypeOf<string>()
+
+  type ValueAtPathB_C = PathValue<MyObjectType, 'b.c'> // Output: number
+  expectTypeOf<ValueAtPathB_C>().toEqualTypeOf<number>()
+
+  type ValueAtPathB_D_E = PathValue<MyObjectType, 'b.d.e'> // Output: boolean
+  expectTypeOf<ValueAtPathB_D_E>().toEqualTypeOf<boolean>()
+
+  type ValueAtPathF_0 = PathValue<MyObjectType, 'f.0'> // Output: { g: string }
+  expectTypeOf<ValueAtPathF_0>().toEqualTypeOf<{ g: string }>()
+
+  type ValueAtPathF_0_G = PathValue<MyObjectType, 'f.0.g'> // Output: string
+  expectTypeOf<ValueAtPathF_0_G>().toEqualTypeOf<string>()
+})
+
+it('Test readme usage example: 🔄 Objects with cyclic dependency', () => {
+  // Define an object type with nested properties and a cyclic dependency
+  type Node = {
+    id: number
+    label: string
+    parent: Node
+    children: Node[]
+  }
+
+  // Example 1: Using the Path type with a Depth limit
+  type NodePathsDepth2 = Path<Node, 2> // Depth limit of 2
+
+  // NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 3:
+  // 'id' | 'label' | 'parent' | 'children' | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.${any}` | `parent.children.${any}` | `children.${number}` | `children.${number}.${any}`
+  expectTypeOf<NodePathsDepth2>().toEqualTypeOf<
+    | 'id'
+    | 'label'
+    | 'parent'
+    | 'children'
+    | 'parent.id'
+    | 'parent.label'
+    | 'parent.parent'
+    | 'parent.children'
+    | `parent.parent.${any}`
+    | `parent.children.${any}`
+    | `children.${number}`
+    | `children.${number}.${any}`
+  >()
+
+  // Example 2: Using the PathValue type with a Depth limit
+  type ValueAtPathParent_Id = PathValue<Node, 'parent.id', 3> // Output: number
+  expectTypeOf<ValueAtPathParent_Id>().toEqualTypeOf<number>()
+
+  type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Output: string | undefined
+  expectTypeOf<ValueAtPathChildren_0_Label>().toEqualTypeOf<string | undefined>()
+
+  type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
+  expectTypeOf<ValueAtPathParent_Parent_Parent>().toEqualTypeOf<unknown>()
+})
