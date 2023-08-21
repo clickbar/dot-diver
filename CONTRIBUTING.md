@@ -52,5 +52,4 @@ If the project maintainer has any additional requirements, you will find them li
 
 **Happy coding**!
 
-
 -- Thanks to [Spatie](https://github.com/spatie) for these contributing guidelines & their packages.

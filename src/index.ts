@@ -47,13 +47,13 @@ type RemoveInvalidDotPathKeys<T> = T extends symbol
   : never
 
 // check if a type is an array
-type IsArray<T> = T extends Array<any> ? true : false
+type IsArray<T> = T extends any[] ? true : false
 
 // check if a array is empty
 type IsEmptyArray<T> = T extends [] ? true : false
 
-// Get the type of an array element
-type GetArrayElement<T> = T extends Array<infer U> ? U : never
+// Get the type of array element
+type GetArrayElement<T> = T extends (infer U)[] ? U : never
 
 /**
  * check if a type is any
@@ -90,13 +90,13 @@ type IsTuple<T> = T extends [any, ...any[]] ? true : false
 // get the length of a tuple
 type TupleLength<T> = T extends { length: infer L } ? (L extends number ? L : never) : never
 
-// get the type of a tuple element
+// get the type of tuple element
 type TupleElement<T, N> = N extends keyof T ? T[N] : never
 
 // get all numbers from 0 to L
 type NumbersToZero<
   IterationCarry extends unknown[],
-  DepthCarry extends unknown[]
+  DepthCarry extends unknown[],
 > = TupleLength<DepthCarry> extends 0
   ? any
   : TupleLength<IterationCarry> extends 0
@@ -117,7 +117,9 @@ type Writeable<T> = {
 
 type MinusOne<N extends unknown[]> = N extends [...infer U, unknown] ? U : never
 
-type BuildTuple<L extends number, T extends unknown[] = []> = T extends { length: L }
+type BuildTuple<L extends number, T extends unknown[] = []> = T extends {
+  length: L
+}
   ? T
   : BuildTuple<L, [...T, unknown]>
 
@@ -129,7 +131,7 @@ type BuildTuple<L extends number, T extends unknown[] = []> = T extends { length
 type GetRecordPaths<
   T,
   DepthCarry extends unknown[],
-  K extends keyof T = keyof T
+  K extends keyof T = keyof T,
 > = K extends keyof T
   ? RemoveInvalidDotPathKeys<K> | `${RemoveInvalidDotPathKeys<K>}.${Path<T[K], DepthCarry>}`
   : never
@@ -229,13 +231,15 @@ type SearchableObject = Record<never, never> | unknown[]
  * Without the intersection, the path would just be of type PathEntry<T, 10> and PathValueEntry would be a union of all possible return types.
  * By using the intersection, TypeScript is forced to apply the PathEntry constraints and infer the type from the provided user input.
  */
+
 function getByPath<T extends SearchableObject, P extends PathEntry<T, 10> & string>(
   object: T,
-  path: P
+  path: P,
 ): PathValueEntry<T, P, 10> {
   const pathArray = (path as string).split('.')
 
-  return pathArray.reduce((accumulator: any, current) => accumulator?.[current], object) as any
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+  return pathArray.reduce((accumulator: any, current) => accumulator?.[current], object)
 }
 
 /**
@@ -252,7 +256,7 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T, 10> & stri
 function setByPath<
   T extends SearchableObject,
   P extends PathEntry<T, 10> & string,
-  V extends PathValueEntry<T, P, 10>
+  V extends PathValueEntry<T, P, 10>,
 >(object: T, path: P, value: V): void {
   const pathArray = (path as string).split('.')
   const lastKey = pathArray.pop()
@@ -261,15 +265,18 @@ function setByPath<
     throw new Error('Path is empty')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const objectToSet = pathArray.reduce(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
     (accumulator: any, current) => accumulator?.[current],
-    object
+    object,
   )
 
   if (objectToSet === undefined) {
     throw new Error('Path is invalid')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   objectToSet[lastKey] = value
 }
 

@@ -58,9 +58,7 @@ it('Symbols are not allowed members', () => {
 })
 
 it('symbol index signature gets ignored', () => {
-  type TestType = {
-    [index: symbol]: string
-  }
+  type TestType = Record<symbol, string>
 
   expectTypeOf<Path<TestType>>().toEqualTypeOf<never>()
 })
@@ -90,7 +88,7 @@ it('Arrays can be accessed with number', () => {
 })
 
 it('nullable arrays can be accessed with number', () => {
-  type TestType = {
+  interface TestType {
     array: { a: string; b: number }[] | null
   }
 
@@ -108,7 +106,7 @@ it('Tuples can be accessed with number', () => {
 
   expectTypeOf<Path<TestType>>().toEqualTypeOf<0 | 1 | 2>()
 
-  type TestTypeObject = {
+  interface TestTypeObject {
     tuple: TestType
   }
 
@@ -139,13 +137,13 @@ it('Tuples/Arrays with specific length can be accessed with number', () => {
 /* -------------------------------------------------------------------------- */
 
 it('Paths of optional members gets returned', () => {
-  type TestType = {
+  interface TestType {
     optionalProp?: string
   }
 
   expectTypeOf<Path<TestType>>().toEqualTypeOf<'optionalProp'>()
 
-  type TestTypeWithOptionalObject = {
+  interface TestTypeWithOptionalObject {
     optionalProp?: {
       stringProp: string
     }
@@ -163,7 +161,7 @@ it('Paths of optional members gets returned', () => {
 
   expectTypeOf<Path<ExpectedTypeWithOptionalObject>>().toEqualTypeOf<'stringProp'>()
 
-  type TestTypeWithOptionalArray = {
+  interface TestTypeWithOptionalArray {
     optionalProp?: string[]
   }
 
@@ -177,7 +175,7 @@ it('Paths of optional members gets returned', () => {
 /* -------------------------------------------------------------------------- */
 
 it('Readonly values can be accessed', () => {
-  type TestType = {
+  interface TestType {
     readonly stringProp: string
   }
 
@@ -187,7 +185,7 @@ it('Readonly values can be accessed', () => {
 })
 
 it('Readonly arrays can be accessed', () => {
-  type TestType = {
+  interface TestType {
     readonly array: readonly string[]
   }
 
@@ -197,7 +195,7 @@ it('Readonly arrays can be accessed', () => {
 })
 
 it('Readonly tuples can be accessed', () => {
-  type TestType = {
+  interface TestType {
     readonly tuple: readonly ['a', 'b', 'c']
   }
 
@@ -207,7 +205,7 @@ it('Readonly tuples can be accessed', () => {
 })
 
 it('Readonly objects can be accessed', () => {
-  type TestType = {
+  interface TestType {
     readonly object: {
       readonly stringProp: string
     }
@@ -219,7 +217,7 @@ it('Readonly objects can be accessed', () => {
 })
 
 it('Readonly objects with optional members can be accessed', () => {
-  type TestType = {
+  interface TestType {
     readonly object: {
       readonly stringProp?: string
     }
@@ -235,73 +233,88 @@ it('Readonly objects with optional members can be accessed', () => {
 /* -------------------------------------------------------------------------- */
 
 it('Type of index signature gets returned correctly', () => {
-  type TestType = {
-    [index: string | number]: string
-  }
+  type TestType = Record<string | number, string>
 
   expectTypeOf<Path<TestType>>().toEqualTypeOf<string | number>()
 
-  type TestType2 = {
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  interface TestType2 {
     [index: string]: string
   }
 
   // @ts-expect-error - typescript transforms keyof string index signature to string | number
-  assertType<string>(null as unknown as Path<TestType2>)
+  expectTypeOf<Path<TestType2>>().toEqualTypeOf<string>()
 
-  type TestType3 = {
-    [index: number]: string
-  }
+  type TestType3 = Record<number, string>
 
   expectTypeOf<Path<TestType3>>().toEqualTypeOf<number>()
 })
 
 it('Symbols as index signature gets ignored', () => {
-  type TestType = {
+  type TestTypeRecord = Record<symbol, string>
+
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  interface TestTypeIndexSignature {
     [index: symbol]: string
   }
 
-  expectTypeOf<Path<TestType>>().toEqualTypeOf<never>()
+  expectTypeOf<Path<TestTypeRecord>>().toEqualTypeOf<never>()
+  expectTypeOf<Path<TestTypeIndexSignature>>().toEqualTypeOf<never>()
 
-  type TestType2 = {
+  type TestTypeRecord2 = Record<string | symbol, string>
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  interface TestTypeIndexSignature2 {
     [index: string | symbol]: string
   }
 
-  expectTypeOf<Path<TestType2>>().toEqualTypeOf<string | number>()
+  expectTypeOf<Path<TestTypeRecord2>>().toEqualTypeOf<string>()
+  // TypeScript transforms index signature to string | number, while Records will use their generic parameter only
+  expectTypeOf<Path<TestTypeIndexSignature2>>().toEqualTypeOf<string | number>()
 
-  type TestType3 = {
+  type TestTypeRecord3 = Record<number | symbol, string>
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  interface TestType3IndexSignature3 {
     [index: number | symbol]: string
   }
 
-  expectTypeOf<Path<TestType3>>().toEqualTypeOf<number>()
+  expectTypeOf<Path<TestTypeRecord3>>().toEqualTypeOf<number>()
+  expectTypeOf<Path<TestType3IndexSignature3>>().toEqualTypeOf<number>()
 
-  type TestType4 = {
+  type TestTypeRecord4 = Record<string | number | symbol, string>
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  interface TestTypeIndexSignature4 {
     [index: string | number | symbol]: string
   }
 
-  expectTypeOf<Path<TestType4>>().toEqualTypeOf<string | number>()
+  expectTypeOf<Path<TestTypeRecord4>>().toEqualTypeOf<string | number>()
+  expectTypeOf<Path<TestTypeIndexSignature4>>().toEqualTypeOf<string | number>()
 })
 
 it('Nested Path of nested objects in index signature gets returned correctly', () => {
-  type TestTyp = {
-    [index: string]: {
-      [index: string]: {
+  type TestTyp = Record<
+    string,
+    Record<
+      string,
+      {
         a: string
         b: number
       }
-    }
-  }
+    >
+  >
 
   type ExpectedType =
     | string
-    | number
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     | `${string}.${string}`
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     | `${string}.${string}.a`
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     | `${string}.${string}.b`
 
   expectTypeOf<Path<TestTyp>>().toEqualTypeOf<ExpectedType>()
 
-  // This works but the returning type of Path is far to broad and ignores the nested structure inside a index signature
-  expectTypeOf<Path<TestTyp>>().toEqualTypeOf<string | number>() // should throw an error
+  // This works but the returning type of Path is far too broad and ignores the nested structure inside a index signature
+  expectTypeOf<Path<TestTyp>>().toEqualTypeOf<string>()
   // Typescript simplifies string | `${string}.${string}` to string
   // We can't really do anything about this without sacrificing readability of code completion
 })
@@ -311,7 +324,7 @@ it('Nested Path of nested objects in index signature gets returned correctly', (
 /* -------------------------------------------------------------------------- */
 
 it('Cyclic dependencies are handled correctly', () => {
-  type SimpleTestType = {
+  interface SimpleTestType {
     a: SimpleTestType
   }
 
@@ -320,7 +333,7 @@ it('Cyclic dependencies are handled correctly', () => {
   // It is important, that typescript doesn't throw an error here because of recursion depth
   expectTypeOf<SimpleResult>().toEqualTypeOf<Path<SimpleTestType>>()
 
-  type TestType = {
+  interface TestType {
     a: TestType
     b: [TestType]
     c: TestType[]
@@ -330,7 +343,7 @@ it('Cyclic dependencies are handled correctly', () => {
     f: TestType2
   }
 
-  type TestType2 = {
+  interface TestType2 {
     a: TestType
   }
 
@@ -368,7 +381,7 @@ it('PathValue returns the correct type', () => {
 })
 
 it('Optional members are return with undefined', () => {
-  type TestType = {
+  interface TestType {
     optionalProp?: string
   }
 
@@ -376,7 +389,7 @@ it('Optional members are return with undefined', () => {
 
   expectTypeOf<PathValue<TestType, 'optionalProp'>>().toEqualTypeOf<ExpectedType>()
 
-  type TestTypeWithOptionalObject = {
+  interface TestTypeWithOptionalObject {
     optionalProp?: {
       stringProp: string
     }
@@ -395,7 +408,7 @@ it('Optional members are return with undefined', () => {
     PathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>
   >().toEqualTypeOf<ExpectedType>()
 
-  type TestTypeWithOptionalArray = {
+  interface TestTypeWithOptionalArray {
     optionalProp?: string[]
   }
 
@@ -410,7 +423,7 @@ it('Optional members are return with undefined', () => {
 })
 
 it('PathValue works with optional (nested) members', () => {
-  type TestType = {
+  interface TestType {
     optionalProp?: {
       stringProp: string
     }
@@ -423,27 +436,27 @@ it('PathValue works with optional (nested) members', () => {
 })
 
 it('PathValue works with readonly (nested) members', () => {
-  type TestType = {
+  interface TestType {
     readonly stringProp: string
   }
 
   expectTypeOf<PathValue<TestType, 'stringProp'>>().toEqualTypeOf<string>()
 
-  type TestTypeArray = {
+  interface TestTypeArray {
     readonly array: readonly string[]
   }
 
   expectTypeOf<PathValue<TestTypeArray, 'array'>>().toEqualTypeOf<readonly string[]>()
   expectTypeOf<PathValue<TestTypeArray, 'array.0'>>().toEqualTypeOf<string | undefined>()
 
-  type TestTypeTuple = {
+  interface TestTypeTuple {
     readonly tuple: readonly ['a', 'b', 'c']
   }
 
   expectTypeOf<PathValue<TestTypeTuple, 'tuple'>>().toEqualTypeOf<readonly ['a', 'b', 'c']>()
   expectTypeOf<PathValue<TestTypeTuple, 'tuple.0'>>().toEqualTypeOf<'a'>()
 
-  type TestTypeObject = {
+  interface TestTypeObject {
     readonly object: {
       readonly stringProp: string
     }
@@ -456,23 +469,36 @@ it('PathValue works with readonly (nested) members', () => {
 })
 
 it('PathValue works with index signatures', () => {
-  type TestType = {
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  interface TestType {
     [index: string]: string
   }
 
   expectTypeOf<PathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
+  // This can also be a number, because TypeScript broadens the typing of index signatures to include number.
+  // Because both string and number can be used to access the elements of such an object.
+  expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
+})
+
+it('PathValue works with index signatures defined via Record<X,Y>', () => {
+  type TestType = Record<string, string>
+
+  expectTypeOf<PathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
+  // @ts-expect-error TypeScripts keyof index signatures in Records are constrained to their generic parameter
   expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with nested index signatures', () => {
-  type TestType = {
-    [index: string]: {
-      [index: string]: {
+  type TestType = Record<
+    string,
+    Record<
+      string,
+      {
         a: string
         b: number
       }
-    }
-  }
+    >
+  >
 
   expectTypeOf<PathValue<TestType, `${string}.${string}`>>().toEqualTypeOf<
     { a: string; b: number } | undefined
@@ -482,7 +508,7 @@ it('PathValue works with nested index signatures', () => {
 })
 
 it('PathValue works with arrays', () => {
-  type TestType = {
+  interface TestType {
     array: string[]
   }
 
@@ -491,7 +517,7 @@ it('PathValue works with arrays', () => {
 })
 
 it('PathValue works with objects in arrays', () => {
-  type TestType = {
+  interface TestType {
     array: { a: string }[]
   }
 
@@ -501,7 +527,7 @@ it('PathValue works with objects in arrays', () => {
 })
 
 it('PathValue works with objects in nullable arrays', () => {
-  type TestType = {
+  interface TestType {
     array: { a: string; b: number }[] | null
   }
 
@@ -518,13 +544,13 @@ it('PathValue works with objects in nullable arrays', () => {
 })
 
 it('PathValue works with unions', () => {
-  type TestType = {
+  interface TestType {
     union: string | number
   }
 
   expectTypeOf<PathValue<TestType, 'union'>>().toEqualTypeOf<string | number>()
 
-  type TestType2 = {
+  interface TestType2 {
     union: string | { a: string }
   }
 
@@ -534,7 +560,7 @@ it('PathValue works with unions', () => {
 })
 
 it('PathValue works with tuples', () => {
-  type TestType = {
+  interface TestType {
     tuple: ['a', 'b', 'c']
   }
 
@@ -543,7 +569,7 @@ it('PathValue works with tuples', () => {
 })
 
 it('PathValue works with objects in tuples', () => {
-  type TestType = {
+  interface TestType {
     tuple: [{ a: string }, 'b']
   }
 
@@ -559,7 +585,7 @@ it('PathValue works with multi-dimensional arrays', () => {
 
   expectTypeOf<PathValue<TestType, '0.0.0'>>().toEqualTypeOf<string | undefined>()
 
-  type TestType2 = {
+  interface TestType2 {
     array: { a: string }[][]
   }
 
@@ -572,7 +598,7 @@ it('PathValue works with multi-dimensional arrays', () => {
 
 it('Test readme usage example: 🛣️ Path and 🔖 PathValue', () => {
   // Define a sample object type with nested properties
-  type MyObjectType = {
+  interface MyObjectType {
     a: string
     b: {
       c: number
@@ -611,7 +637,7 @@ it('Test readme usage example: 🛣️ Path and 🔖 PathValue', () => {
 
 it('Test readme usage example: 🔄 Objects with cyclic dependency', () => {
   // Define an object type with nested properties and a cyclic dependency
-  type Node = {
+  interface Node {
     id: number
     label: string
     parent: Node

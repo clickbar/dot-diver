@@ -28,4 +28,3 @@ jobs:
       - run: pnpm rebuild && pnpm run --if-present prepare
 
       - run: pnpm test
-

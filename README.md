@@ -5,6 +5,7 @@ A lightweight, powerful, and dependency-free TypeScript utility library that pro
 Dot notation is a popular and convenient way to access deeply nested properties in objects. With Dot Diver, you can safely work with object paths in TypeScript projects, ensuring type correctness and productivity!
 
 Example:
+
 ```typescript
 import { getByPath } from '@clickbar/dot-diver'
 
@@ -14,6 +15,7 @@ const object = {
 
 const result = getByPath(object, 'a') // result is 'Hello world'
 ```
+
 <br>
 
 ## 🌟 Features
@@ -194,7 +196,7 @@ import type { Path, SearchableObject, PathValue } from '@clickbar/dot-diver'
 
 function getByPathDepth10<T extends SearchableObject, P extends Path<T, 5> & string>(
   object: T,
-  path: P
+  path: P,
 ): PathValue<T, P, 5> {
   return getByPath(object, path) as PathValue<T, P, 5>
 }
@@ -202,7 +204,7 @@ function getByPathDepth10<T extends SearchableObject, P extends Path<T, 5> & str
 function setByPathDepth10<
   T extends SearchableObject,
   P extends Path<T, 5> & string,
-  V extends PathValue<T, P, 5>
+  V extends PathValue<T, P, 5>,
 >(object: T, path: P, value: V): void {
   setByPath(object, path, value as PathValue<T, P, 10>)
 }
