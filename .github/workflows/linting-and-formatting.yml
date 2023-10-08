@@ -1,19 +1,21 @@
-name: Fix styling
+name: Linting and formatting
 
 on: [push]
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+  # The concurrency group contains the workflow name and the branch name.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   fix-styling:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.head_ref }}
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v2
-        with:
-          version: 7
 
       - uses: actions/setup-node@v3
         with:
@@ -27,9 +29,8 @@ jobs:
       # `pnpm rebuild` will run all those post-install scripts for us.
       - run: pnpm rebuild && pnpm run --if-present prepare
 
-      - run: pnpm fix
+      - name: Run ESLint
+        run: pnpm lint
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Fix styling
+      - name: Run prettier
+        run: pnpm prettier --check

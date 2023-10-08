@@ -2,6 +2,7 @@
   "name": "@clickbar/dot-diver",
   "version": "1.0.1",
   "description": "Types and utilities to access object properties by dot notation.",
+  "packageManager": "pnpm@8.8.0",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
@@ -19,7 +20,9 @@
     "build": "vite build",
     "test": "vitest run && vitest typecheck --run",
     "lint": "eslint ./ --ext=js,ts",
-    "fix": "eslint ./ --ext=js,ts --fix"
+    "prettier": "prettier . --cache",
+    "fix": "pnpm lint --fix && pnpm format",
+    "format": "pnpm prettier --write"
   },
   "keywords": [
     "ts",
@@ -43,12 +46,12 @@
     "Tobias Kröll <tk@clickbar.dev> (https://github.com/saibotk)"
   ],
   "devDependencies": {
-    "@clickbar/eslint-config-typescript": "^4.3.0",
-    "eslint": "^8.36.0",
-    "prettier": "^2.8.7",
-    "typescript": "^5.0.2",
-    "vite": "^4.2.1",
-    "vite-plugin-dts": "^2.1.0",
-    "vitest": "^0.29.7"
+    "@clickbar/eslint-config-typescript": "^9.0.1",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.11",
+    "vite-plugin-dts": "^3.6.0",
+    "vitest": "^0.34.6"
   }
 }
