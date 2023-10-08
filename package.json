@@ -45,12 +45,12 @@
     "Tobias Kröll <tk@clickbar.dev> (https://github.com/saibotk)"
   ],
   "devDependencies": {
-    "@clickbar/eslint-config-typescript": "^8.0.2",
-    "eslint": "^8.47.0",
-    "prettier": "^3.0.2",
-    "typescript": "^5.1.6",
-    "vite": "^4.4.9",
-    "vite-plugin-dts": "^3.5.2",
-    "vitest": "^0.34.2"
+    "@clickbar/eslint-config-typescript": "^9.0.1",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.11",
+    "vite-plugin-dts": "^3.6.0",
+    "vitest": "^0.34.6"
   }
 }

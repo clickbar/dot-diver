@@ -40,8 +40,7 @@ type RemoveInvalidDotPathKeys<T> = T extends symbol
   : T extends number
   ? T
   : T extends string
-  ? // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    T extends `${infer _K}.${infer _R}`
+  ? T extends `${infer _K}.${infer _R}`
     ? never
     : T
   : never
@@ -190,8 +189,7 @@ type PathValueStep<T, P, DepthCarry extends unknown[]> = IsAny<T> extends true
     ? PathValue<TupleElement<T, H>, R, DepthCarry>
     : TupleElement<T, P>
   : IsArray<T> extends true
-  ? // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    P extends `${infer _H}.${infer R}`
+  ? P extends `${infer _H}.${infer R}`
     ? PathValue<GetArrayElement<T>, R, DepthCarry> | undefined
     : GetArrayElement<T> | undefined
   : P extends `${infer H}.${infer R}`
@@ -232,10 +230,10 @@ type SearchableObject = Record<never, never> | unknown[]
  * By using the intersection, TypeScript is forced to apply the PathEntry constraints and infer the type from the provided user input.
  */
 
-function getByPath<T extends SearchableObject, P extends PathEntry<T, 10> & string>(
+function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
   object: T,
   path: P,
-): PathValueEntry<T, P, 10> {
+): PathValueEntry<T, P> {
   const pathArray = (path as string).split('.')
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
@@ -255,8 +253,8 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T, 10> & stri
  */
 function setByPath<
   T extends SearchableObject,
-  P extends PathEntry<T, 10> & string,
-  V extends PathValueEntry<T, P, 10>,
+  P extends PathEntry<T> & string,
+  V extends PathValueEntry<T, P>,
 >(object: T, path: P, value: V): void {
   const pathArray = (path as string).split('.')
   const lastKey = pathArray.pop()
