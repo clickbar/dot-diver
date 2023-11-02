@@ -4,6 +4,10 @@ All notable changes to **dot-diver** will be documented here. Inspired by [keep 
 
 ## Unreleased
 
+## [1.0.3](https://github.com/clickbar/dot-diver/tree/1.0.3) (2023-11-03)
+
+- Rerelease with fixed release pipeline 😅
+
 ## [1.0.2](https://github.com/clickbar/dot-diver/tree/1.0.2) (2023-11-02)
 
 - Updated dependencies
