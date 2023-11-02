@@ -222,8 +222,8 @@ type SearchableObject = Record<never, never> | unknown[]
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
 /**
- * Retrives a value from an object by dot notation. The value is received by optional chaining,
- * therefore this function returns undefined if a intermediate property is undefined.
+ * Retrieves a value from an object by dot notation. The value is received by optional chaining,
+ * therefore this function returns undefined if an intermediate property is undefined.
  *
  * @param object - object to get value from
  * @param path - path to value
@@ -252,14 +252,14 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
 }
 
 /**
- * Sets a value in an object by dot notation. If a intermediate property is undefined,
+ * Sets a value in an object by dot notation. If an intermediate property is undefined,
  * this function will throw an error.
  *
  * @param object - object to set value in
  * @param path - path to value
  * @param value - value to set
  *
- * @throws {Error} - if a intermediate property is undefined
+ * @throws {Error} - if an intermediate property is undefined
  *
  * @privateRemarks
  * The intersection between PathEntry<T, 10>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
