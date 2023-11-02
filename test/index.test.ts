@@ -160,3 +160,58 @@ it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   setByPathDepth5(object, 'f.1.g', 'new array-item-2')
   expect(object.f[1].g).toBe('new array-item-2')
 })
+
+it('Test for prototype pollution', () => {
+  const object = {}
+
+  expect(() => {
+    // @ts-expect-error - this is not a valid path for the object
+    setByPath(object, '__proto__.polluted', true)
+  }).toThrowError('__proto__')
+
+  // @ts-expect-error - this is not a valid path for the object
+  expect(getByPath(object, '__proto__')).toBe(undefined)
+
+  expect(() => {
+    // @ts-expect-error - this is not a valid path for the object
+    setByPath(object, 'constructor.polluted', true)
+  }).toThrowError('constructor')
+
+  // @ts-expect-error - this is not a valid path for the object
+  expect(getByPath(object, 'constructor')).toBe(undefined)
+
+  // @ts-expect-error - this is should not be defined on the object
+  expect(object.polluted).toBe(undefined)
+
+  const object2 = { constructor: { prototype: { polluted: true } } }
+
+  expect(getByPath(object2, 'constructor.prototype.polluted')).toBe(true)
+
+  setByPath(object2, 'constructor.prototype.polluted', false)
+
+  expect(object2.constructor.prototype.polluted).toBe(false)
+
+  // eslint-disable-next-line @typescript-eslint/no-extraneous-class
+  const testClass = class TestClass {
+    // eslint-disable-next-line @typescript-eslint/no-useless-constructor, @typescript-eslint/no-empty-function
+    constructor() {}
+  }
+
+  const object3 = new testClass()
+
+  // @ts-expect-error - this is not a valid path for the object
+  expect(getByPath(object3, 'constructor.prototype')).toBe(undefined)
+
+  // @ts-expect-error - this is not a valid path for the object
+  expect(getByPath(object3, 'constructor')).toBe(undefined)
+
+  expect(() => {
+    // @ts-expect-error - this is not a valid path for the object
+    setByPath(object3, 'constructor.polluted', true)
+  }).toThrowError('constructor')
+
+  expect(() => {
+    // @ts-expect-error - this is not a valid path for the object
+    setByPath(object3, '__proto__.polluted', true)
+  }).toThrowError('__proto__')
+})

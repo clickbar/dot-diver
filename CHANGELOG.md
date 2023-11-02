@@ -7,6 +7,7 @@ All notable changes to **dot-diver** will be documented here. Inspired by [keep 
 - Updated dependencies
 - Formatted code with new lint rules
 - Fixed testcase for new TypeScript behavior
+- Added guards against prototype pollution, thanks to @d3ng03 (<https://github.com/clickbar/dot-diver/security/advisories/GHSA-9w5f-mw3p-pj47>)
 
 ## [1.0.1](https://github.com/clickbar/dot-diver/tree/1.0.1) (2023-03-26)
 
