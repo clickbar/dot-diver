@@ -218,8 +218,12 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10>
 
 type SearchableObject = Record<never, never> | unknown[]
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const hasOwnProperty = Object.prototype.hasOwnProperty
+
 /**
- * Retrives a value from an object by dot notation
+ * Retrives a value from an object by dot notation. The value is received by optional chaining,
+ * therefore this function returns undefined if a intermediate property is undefined.
  *
  * @param object - object to get value from
  * @param path - path to value
@@ -236,15 +240,26 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
 ): PathValueEntry<T, P> {
   const pathArray = (path as string).split('.')
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-  return pathArray.reduce((accumulator: any, current) => accumulator?.[current], object)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return pathArray.reduce((current: any, pathPart) => {
+    if (typeof current !== 'object' || !hasOwnProperty.call(current, pathPart)) {
+      return undefined
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+    return current?.[pathPart]
+  }, object)
 }
 
 /**
- * Sets a value in an object by dot notation
+ * Sets a value in an object by dot notation. If a intermediate property is undefined,
+ * this function will throw an error.
+ *
  * @param object - object to set value in
  * @param path - path to value
  * @param value - value to set
+ *
+ * @throws {Error} - if a intermediate property is undefined
  *
  * @privateRemarks
  * The intersection between PathEntry<T, 10>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
@@ -264,18 +279,24 @@ function setByPath<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const objectToSet = pathArray.reduce(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-    (accumulator: any, current) => accumulator?.[current],
-    object,
-  )
+  const parentObject = pathArray.reduce((current: any, pathPart) => {
+    if (typeof current !== 'object' || !hasOwnProperty.call(current, pathPart)) {
+      throw new Error(`Property ${pathPart} is undefined`)
+    }
 
-  if (objectToSet === undefined) {
-    throw new Error('Path is invalid')
-  }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const next = current?.[pathPart]
+
+    if (next === undefined || next === null) {
+      throw new Error(`Property ${pathPart} is undefined`)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return next
+  }, object)
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  objectToSet[lastKey] = value
+  parentObject[lastKey] = value
 }
 
 export type { PathEntry as Path, PathValueEntry as PathValue, SearchableObject }
