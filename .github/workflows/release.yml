@@ -27,9 +27,10 @@ jobs:
       - name: Get package.json version
         id: package-json-version
         run: echo "version=$(cat package.json | jq '.version' --raw-output)" >> $GITHUB_OUTPUT
-      # Abort if the version in the package.json file (prefixed with 'v') doesn't match the tag name of the release
+
+      # Abort if the version in the package.json file doesn't match the tag name of the release
       - name: Check package.json version against tag name
-        if: format('v{0}', steps.package-json-version.outputs.version) != github.event.release.tag_name
+        if: steps.package-json-version.outputs.version != github.event.release.tag_name
         uses: actions/github-script@v3
         with:
           script: core.setFailed('Release tag does not match package.json version!')
@@ -41,6 +42,6 @@ jobs:
         run: pnpm build
 
       - name: Create Publish to npm
-        run: pnpm publish --provenance
+        run: pnpm publish --provenance --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
