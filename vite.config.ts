@@ -11,5 +11,9 @@ export default defineConfig({
       fileName: 'index',
     },
   },
-  plugins: [dts()],
+  plugins: [
+    dts({
+      include: ['src/'],
+    }),
+  ],
 })
