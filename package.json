@@ -7,7 +7,7 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
+      "require": "./dist/index.umd.cjs",
       "types": "./dist/index.d.ts"
     }
   },
