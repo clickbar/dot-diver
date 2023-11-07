@@ -1,6 +1,6 @@
 {
   "name": "@clickbar/dot-diver",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Types and utilities to access object properties by dot notation.",
   "packageManager": "pnpm@8.8.0",
   "types": "dist/index.d.ts",
