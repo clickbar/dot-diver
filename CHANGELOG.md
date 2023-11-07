@@ -4,6 +4,10 @@ All notable changes to **dot-diver** will be documented here. Inspired by [keep 
 
 ## Unreleased
 
+- Fixed wrong type transformation via vite-dts-plugin (see #15)
+- Fixed wrong cjs export filename
+- Fixed order of types export to be the first export
+
 ## [1.0.3](https://github.com/clickbar/dot-diver/tree/1.0.3) (2023-11-03)
 
 - Rerelease with fixed release pipeline 😅
