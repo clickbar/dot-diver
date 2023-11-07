@@ -4,7 +4,7 @@ All notable changes to **dot-diver** will be documented here. Inspired by [keep 
 
 ## Unreleased
 
-- Fix <https://github.com/clickbar/dot-diver/issues/15> by enabling rollup for types
+- Enable rollup of typescript declaration files
 
 ## [1.0.3](https://github.com/clickbar/dot-diver/tree/1.0.3) (2023-11-03)
 
