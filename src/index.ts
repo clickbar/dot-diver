@@ -216,6 +216,7 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10>
   BuildTuple<Depth>
 >
 
+type SafeObject = Record<string, any>
 type SearchableObject = Record<never, never> | unknown[]
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -240,15 +241,17 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
 ): PathValueEntry<T, P> {
   const pathArray = (path as string).split('.')
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return pathArray.reduce((current: any, pathPart) => {
-    if (typeof current !== 'object' || !hasOwnProperty.call(current, pathPart)) {
+  return pathArray.reduce((current: unknown, pathPart) => {
+    if (
+      typeof current !== 'object' ||
+      current === null ||
+      !hasOwnProperty.call(current, pathPart)
+    ) {
       return undefined
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-    return current?.[pathPart]
-  }, object)
+    return (current as SafeObject)[pathPart] as unknown
+  }, object) as PathValueEntry<T, P>
 }
 
 /**
@@ -278,24 +281,24 @@ function setByPath<
     throw new Error('Path is empty')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const parentObject = pathArray.reduce((current: any, pathPart) => {
-    if (typeof current !== 'object' || !hasOwnProperty.call(current, pathPart)) {
+  const parentObject = pathArray.reduce((current: unknown, pathPart) => {
+    if (
+      typeof current !== 'object' ||
+      current === null ||
+      !hasOwnProperty.call(current, pathPart)
+    ) {
       throw new Error(`Property ${pathPart} is undefined`)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const next = current?.[pathPart]
+    const next: unknown = (current as SafeObject)[pathPart]
 
     if (next === undefined || next === null) {
       throw new Error(`Property ${pathPart} is undefined`)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return next
-  }, object)
+  }, object) as SafeObject
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   parentObject[lastKey] = value
 }
 
