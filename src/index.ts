@@ -242,7 +242,7 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return pathArray.reduce((current: any, pathPart) => {
-    if (typeof current !== 'object' || !hasOwnProperty.call(current, pathPart)) {
+    if (typeof current !== 'object' || current === null || !hasOwnProperty.call(current, pathPart)) {
       return undefined
     }
 
@@ -280,7 +280,7 @@ function setByPath<
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const parentObject = pathArray.reduce((current: any, pathPart) => {
-    if (typeof current !== 'object' || !hasOwnProperty.call(current, pathPart)) {
+    if (typeof current !== 'object' || current === null || !hasOwnProperty.call(current, pathPart)) {
       throw new Error(`Property ${pathPart} is undefined`)
     }
 
