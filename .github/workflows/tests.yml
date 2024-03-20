@@ -1,6 +1,13 @@
 name: Tests
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 # Cancels all previous workflow runs for the same branch that have not yet completed.
 concurrency:
