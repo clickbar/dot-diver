@@ -216,8 +216,8 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10>
   BuildTuple<Depth>
 >
 
-type SafeObject = Record<string, any>
-type SearchableObject = Record<never, never> | unknown[]
+type SafeObject = Record<string | number | symbol, unknown>
+type SearchableObject = SafeObject | unknown[]
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const hasOwnProperty = Object.prototype.hasOwnProperty
@@ -250,8 +250,13 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
       return undefined
     }
 
-    return (current as SafeObject)[pathPart] as unknown
+    return (current as SafeObject)[pathPart]
   }, object) as PathValueEntry<T, P>
+}
+
+function throwAssignmentError(current: unknown, path: string): never {
+  const type = current === null ? 'null' : typeof current
+  throw new TypeError(`Cannot create property '${path}' on ${type}`)
 }
 
 /**
@@ -262,7 +267,7 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
  * @param path - path to value
  * @param value - value to set
  *
- * @throws {Error} - if an intermediate property is undefined
+ * @throws {TypeError} - if an intermediate property is not settable
  *
  * @privateRemarks
  * The intersection between PathEntry<T, 10>  and string is necessary for TypeScript to successfully narrow down the type of P based on the user-provided path input.
@@ -281,25 +286,23 @@ function setByPath<
     throw new Error('Path is empty')
   }
 
-  const parentObject = pathArray.reduce((current: unknown, pathPart) => {
+  const parentObject = pathArray.reduce<unknown>((current, pathPart) => {
     if (
       typeof current !== 'object' ||
       current === null ||
       !hasOwnProperty.call(current, pathPart)
     ) {
-      throw new Error(`Property ${pathPart} is undefined`)
+      throwAssignmentError(current, pathPart)
     }
 
-    const next: unknown = (current as SafeObject)[pathPart]
+    return (current as SafeObject)[pathPart]
+  }, object)
 
-    if (next === undefined || next === null) {
-      throw new Error(`Property ${pathPart} is undefined`)
-    }
+  if (typeof parentObject !== 'object' || parentObject === null) {
+    throwAssignmentError(parentObject, lastKey)
+  }
 
-    return next
-  }, object) as SafeObject
-
-  parentObject[lastKey] = value
+  ;(parentObject as SafeObject)[lastKey] = value
 }
 
 export type { PathEntry as Path, PathValueEntry as PathValue, SearchableObject }

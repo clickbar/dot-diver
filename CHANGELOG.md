@@ -5,6 +5,7 @@ All notable changes to **dot-diver** will be documented here. Inspired by [keep 
 ## Unreleased
 
 - Fixed getByPath throws if accessing a null value
+- Fixed setByPath does not throw when assigning to non objects in browsers
 
 ## [1.0.4](https://github.com/clickbar/dot-diver/tree/1.0.4) (2023-11-07)
 
