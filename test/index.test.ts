@@ -98,7 +98,6 @@ it('Test readme usage example: 🔎 getByPath and 🔏 setByPath', () => {
   expect(object.f[1].g).toBe('new array-item-2')
 })
 
-
 it('returns undefined on non objects', () => {
   const test = {
     first: 'test',
@@ -106,9 +105,9 @@ it('returns undefined on non objects', () => {
     undef: undefined,
   }
 
-  expect(getByPath(test, 'first.foo')).toBe(undefined)
-  expect(getByPath(test, 'null.bar')).toBe(undefined)
-  expect(getByPath(test, 'undef.baz')).toBe(undefined)
+  expect(getByPath(test as any, 'first.foo')).toBe(undefined)
+  expect(getByPath(test as any, 'null.bar')).toBe(undefined)
+  expect(getByPath(test as any, 'undef.baz')).toBe(undefined)
 })
 
 it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
