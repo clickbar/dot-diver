@@ -98,6 +98,19 @@ it('Test readme usage example: 🔎 getByPath and 🔏 setByPath', () => {
   expect(object.f[1].g).toBe('new array-item-2')
 })
 
+
+it('returns undefined on non objects', () => {
+  const test = {
+    first: 'test',
+    null: null,
+    undef: undefined,
+  }
+
+  expect(getByPath(test, 'first.foo')).toBe(undefined)
+  expect(getByPath(test, 'null.bar')).toBe(undefined)
+  expect(getByPath(test, 'undef.baz')).toBe(undefined)
+})
+
 it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   // eslint-disable-next-line unicorn/consistent-function-scoping
   function getByPathDepth5<T extends SearchableObject, P extends Path<T, 5> & string>(
