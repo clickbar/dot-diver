@@ -99,15 +99,43 @@ it('Test readme usage example: 🔎 getByPath and 🔏 setByPath', () => {
 })
 
 it('returns undefined on non objects', () => {
-  const test = {
+  const test: any = {
     first: 'test',
     null: null,
     undef: undefined,
   }
 
-  expect(getByPath(test as any, 'first.foo')).toBe(undefined)
-  expect(getByPath(test as any, 'null.bar')).toBe(undefined)
-  expect(getByPath(test as any, 'undef.baz')).toBe(undefined)
+  expect(getByPath(test, 'first.foo')).toBe(undefined)
+  expect(getByPath(test, 'null.bar')).toBe(undefined)
+  expect(getByPath(test, 'undef.baz')).toBe(undefined)
+})
+
+it('throws when setting invalid path', () => {
+  const test: any = {
+    first: 'test',
+    null: null,
+    undef: undefined,
+    symbol: Symbol(),
+  }
+
+  expect(() => {
+    setByPath(null as any, 'first', true)
+  }).toThrowError("Cannot create property 'first' on null")
+  expect(() => {
+    setByPath(test, 'first.foo', true)
+  }).toThrowError("Cannot create property 'foo' on string")
+  expect(() => {
+    setByPath(test, 'first.foo.baz', true)
+  }).toThrowError("Cannot create property 'foo' on string")
+  expect(() => {
+    setByPath(test, 'null.bar', true)
+  }).toThrowError("Cannot create property 'bar' on null")
+  expect(() => {
+    setByPath(test, 'undef.baz', true)
+  }).toThrowError("Cannot create property 'baz' on undefined")
+  expect(() => {
+    setByPath(test, 'symbol.baz', true)
+  }).toThrowError("Cannot create property 'baz' on symbol")
 })
 
 it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
@@ -171,6 +199,12 @@ it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
 
   setByPathDepth5(object, 'f.1.g', 'new array-item-2')
   expect(object.f[1].g).toBe('new array-item-2')
+})
+
+it('setByPath and getByPath accepts arrays', () => {
+  const object = [{ test: '' }]
+  setByPath(object, '0.test', 'ok')
+  expect(getByPath(object, '0.test')).toBe('ok')
 })
 
 it('Test for prototype pollution', () => {
