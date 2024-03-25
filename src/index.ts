@@ -217,7 +217,7 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10>
 >
 
 type SafeObject = Record<string, unknown>
-type SearchableObject = object | unknown[]
+type SearchableObject = object
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const hasOwnProperty = Object.prototype.hasOwnProperty
