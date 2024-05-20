@@ -110,6 +110,24 @@ it('returns undefined on non objects', () => {
   expect(getByPath(test, 'undef.baz')).toBe(undefined)
 })
 
+it('it returns undefined when accessing an unset path', () => {
+  const test = {
+    foo: 'bar',
+  } as const
+
+  // @ts-expect-error - '' is not define on the property, so it is correct that typescript throws an error here
+  // but since no type information are available in runtime, getByPath will still try to retrieve its value
+  expect(getByPath(test, '')).toBe(undefined)
+
+  // @ts-expect-error - 'foo' is not set on the property, so typescript should throw an error here
+  // but as mentioned above, we still will set the value at runtime
+  setByPath(test, '', 'bar')
+
+  // @ts-expect-error - '' is not set on the property, so typescript should throw an error here
+  // but it will still return 'bar' at runtime since we did set it
+  expect(getByPath(test, '')).toBe('bar')
+})
+
 it('throws when setting invalid path', () => {
   const test: any = {
     first: 'test',
