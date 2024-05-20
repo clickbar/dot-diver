@@ -18,7 +18,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "vite build",
-    "test": "vitest run && vitest typecheck --run",
+    "test": "vitest run --typecheck",
     "lint": "eslint ./ --ext=js,ts",
     "prettier": "prettier . --cache",
     "fix": "pnpm lint --fix && pnpm format",
@@ -46,12 +46,13 @@
     "Tobias Kröll <tk@clickbar.dev> (https://github.com/saibotk)"
   ],
   "devDependencies": {
-    "@clickbar/eslint-config-typescript": "^9.0.1",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2",
-    "vite": "^4.4.11",
-    "vite-plugin-dts": "^3.6.0",
-    "vitest": "^0.34.6"
+    "@clickbar/eslint-config-typescript": "^10.2.0",
+    "@types/node": "^20.12.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^1.6.0"
   }
 }
