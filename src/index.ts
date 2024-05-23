@@ -9,10 +9,10 @@ type IsNullableOrUndefineable<T> = null extends T ? true : undefined extends T ?
 type FilterIndexSignatureType<T> = string extends T
   ? never
   : number extends T
-  ? never
-  : symbol extends T
-  ? never
-  : T
+    ? never
+    : symbol extends T
+      ? never
+      : T
 
 // Remove the index signature from a type
 type RemoveIndexSignature<T> = {
@@ -23,27 +23,24 @@ type RemoveIndexSignature<T> = {
 type HasIndexSignature<T> = string extends keyof T
   ? true
   : number extends keyof T
-  ? true
-  : symbol extends keyof T
-  ? true
-  : false
+    ? true
+    : symbol extends keyof T
+      ? true
+      : false
 
-type GetValidIndexSignature<T> = Exclude<keyof T, symbol> extends infer K
-  ? K extends string | number
-    ? K
-    : never
-  : never
+type GetValidIndexSignature<T> =
+  Exclude<keyof T, symbol> extends infer K ? (K extends string | number ? K : never) : never
 
 // Keys have to be strings or number and can't contain a dot since we won't be able to differ between and key with a dot and a nested key
 type RemoveInvalidDotPathKeys<T> = T extends symbol
   ? never
   : T extends number
-  ? T
-  : T extends string
-  ? T extends `${infer _K}.${infer _R}`
-    ? never
-    : T
-  : never
+    ? T
+    : T extends string
+      ? T extends `${infer _K}.${infer _R}`
+        ? never
+        : T
+      : never
 
 // check if a type is an array
 type IsArray<T> = T extends any[] ? true : false
@@ -67,13 +64,8 @@ type IsNever<T> = [T] extends [never] ? true : false
  * check if a type is unknown
  * @link https://github.com/sindresorhus/type-fest
  */
-type IsUnknown<T> = IsNever<T> extends true
-  ? false
-  : IsAny<T> extends true
-  ? false
-  : unknown extends T
-  ? true
-  : false
+type IsUnknown<T> =
+  IsNever<T> extends true ? false : IsAny<T> extends true ? false : unknown extends T ? true : false
 
 // check if a type is a primitive
 type IsPrimitive<T> = T extends string | number | boolean | bigint | symbol | undefined | null
@@ -93,16 +85,14 @@ type TupleLength<T> = T extends { length: infer L } ? (L extends number ? L : ne
 type TupleElement<T, N> = N extends keyof T ? T[N] : never
 
 // get all numbers from 0 to L
-type NumbersToZero<
-  IterationCarry extends unknown[],
-  DepthCarry extends unknown[],
-> = TupleLength<DepthCarry> extends 0
-  ? any
-  : TupleLength<IterationCarry> extends 0
-  ? never
-  :
-      | NumbersToZero<MinusOne<IterationCarry>, MinusOne<DepthCarry>>
-      | TupleLength<MinusOne<IterationCarry>>
+type NumbersToZero<IterationCarry extends unknown[], DepthCarry extends unknown[]> =
+  TupleLength<DepthCarry> extends 0
+    ? any
+    : TupleLength<IterationCarry> extends 0
+      ? never
+      :
+          | NumbersToZero<MinusOne<IterationCarry>, MinusOne<DepthCarry>>
+          | TupleLength<MinusOne<IterationCarry>>
 
 // remove readonly from members of a record
 type Writeable<T> = {
@@ -142,72 +132,76 @@ type GetArrayPaths<T, DepthCarry extends unknown[]> = `${number}.${Path<
 >}`
 
 // get all possible paths of a tuple
-type GetTuplePaths<T extends unknown[], DepthCarry extends unknown[]> = NumbersToZero<
-  T,
-  DepthCarry
-> extends infer R
-  ? R extends number
-    ? R | `${R}.${Path<TupleElement<T, R>, DepthCarry>}`
+type GetTuplePaths<T extends unknown[], DepthCarry extends unknown[]> =
+  NumbersToZero<T, DepthCarry> extends infer R
+    ? R extends number
+      ? R | `${R}.${Path<TupleElement<T, R>, DepthCarry>}`
+      : never
     : never
-  : never
 
-type PathStep<T, Depth extends unknown[]> = IsAny<T> extends true
-  ? string
-  : IsUnknown<T> extends true
-  ? never
-  : IsPrimitive<T> extends true
-  ? never
-  : IsTuple<T> extends true
-  ? T extends unknown[]
-    ? GetTuplePaths<T, Depth>
-    : never
-  : IsArray<T> extends true
-  ? (IsEmptyArray<T> extends true ? never : number) | GetArrayPaths<T, Depth>
-  : HasIndexSignature<T> extends true
-  ? GetValidIndexSignature<T> | GetRecordPaths<RemoveIndexSignature<T>, Depth>
-  : GetRecordPaths<T, Depth>
+type PathStep<T, Depth extends unknown[]> =
+  IsAny<T> extends true
+    ? string
+    : IsUnknown<T> extends true
+      ? never
+      : IsPrimitive<T> extends true
+        ? never
+        : IsTuple<T> extends true
+          ? T extends unknown[]
+            ? GetTuplePaths<T, Depth>
+            : never
+          : IsArray<T> extends true
+            ? (IsEmptyArray<T> extends true ? never : number) | GetArrayPaths<T, Depth>
+            : HasIndexSignature<T> extends true
+              ? GetValidIndexSignature<T> | GetRecordPaths<RemoveIndexSignature<T>, Depth>
+              : GetRecordPaths<T, Depth>
 
 // Final path type
-type Path<T, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
-  ? IsPrimitive<T> extends true
-    ? never
-    : any
-  : T extends T
-  ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<DepthCarry>>
-  : never
+type Path<T, DepthCarry extends unknown[]> =
+  TupleLength<DepthCarry> extends 0
+    ? IsPrimitive<T> extends true
+      ? never
+      : any
+    : T extends T
+      ? PathStep<Writeable<ExcludeNullUndefined<T>>, MinusOne<DepthCarry>>
+      : never
 
 type PathEntry<T, Depth extends number = 10> = Path<T, BuildTuple<Depth>>
 
-type PathValueStep<T, P, DepthCarry extends unknown[]> = IsAny<T> extends true
-  ? any
-  : IsUnknown<T> extends true
-  ? unknown
-  : IsNullableOrUndefineable<T> extends true
-  ? PathValue<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
-  : IsTuple<T> extends true
-  ? P extends `${infer H}.${infer R}`
-    ? PathValue<TupleElement<T, H>, R, DepthCarry>
-    : TupleElement<T, P>
-  : IsArray<T> extends true
-  ? P extends `${infer _H}.${infer R}`
-    ? PathValue<GetArrayElement<T>, R, DepthCarry> | undefined
-    : GetArrayElement<T> | undefined
-  : P extends `${infer H}.${infer R}`
-  ? H extends keyof T
-    ? PathValue<T[H], R, DepthCarry> | (HasIndexSignature<T> extends true ? undefined : never)
-    : never
-  : P extends keyof T
-  ? T[P] | (HasIndexSignature<T> extends true ? undefined : never)
-  : never
+type PathValueStep<T, P, DepthCarry extends unknown[]> =
+  IsAny<T> extends true
+    ? any
+    : IsUnknown<T> extends true
+      ? unknown
+      : IsNullableOrUndefineable<T> extends true
+        ? PathValue<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
+        : IsTuple<T> extends true
+          ? P extends `${infer H}.${infer R}`
+            ? PathValue<TupleElement<T, H>, R, DepthCarry>
+            : TupleElement<T, P>
+          : IsArray<T> extends true
+            ? P extends `${infer _H}.${infer R}`
+              ? PathValue<GetArrayElement<T>, R, DepthCarry> | undefined
+              : GetArrayElement<T> | undefined
+            : P extends `${infer H}.${infer R}`
+              ? H extends keyof T
+                ?
+                    | PathValue<T[H], R, DepthCarry>
+                    | (HasIndexSignature<T> extends true ? undefined : never)
+                : never
+              : P extends keyof T
+                ? T[P] | (HasIndexSignature<T> extends true ? undefined : never)
+                : never
 
 // nearly same function as PathValueEntry, but without constraints for P so it is easier to use in PathValueStep
-type PathValue<T, P, DepthCarry extends unknown[]> = TupleLength<DepthCarry> extends 0
-  ? IsPrimitive<T> extends true
-    ? never
-    : unknown
-  : T extends T
-  ? PathValueStep<Writeable<T>, P, MinusOne<DepthCarry>>
-  : never
+type PathValue<T, P, DepthCarry extends unknown[]> =
+  TupleLength<DepthCarry> extends 0
+    ? IsPrimitive<T> extends true
+      ? never
+      : unknown
+    : T extends T
+      ? PathValueStep<Writeable<T>, P, MinusOne<DepthCarry>>
+      : never
 
 // final path value type
 type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10> = PathValue<
