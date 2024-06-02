@@ -140,18 +140,18 @@ it('throws when setting invalid path', () => {
 
 it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   // eslint-disable-next-line unicorn/consistent-function-scoping
-  function getByPathDepth5<T extends SearchableObject, P extends Path<T, P> & string>(
+  function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { depth: 5 }> & string>(
     object: T,
     path: P,
-  ): PathValue<T, P, 5> {
-    return getByPath(object, path) as PathValue<T, P, 5>
+  ): PathValue<T, P> {
+    return getByPath(object, path) as PathValue<T, P>
   }
 
   // eslint-disable-next-line unicorn/consistent-function-scoping
   function setByPathDepth5<
     T extends SearchableObject,
-    P extends Path<T, P, { onlyWriteable: true }> & string,
-    V extends SetPathValue<T, P, 5>,
+    P extends Path<T, P, { onlyWriteable: true, depth: 5 }> & string,
+    V extends SetPathValue<T, P>,
   >(object: T, path: P, value: V): void {
     setByPath(object, path, value as SetPathValue<T, P>)
   }
