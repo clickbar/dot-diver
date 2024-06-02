@@ -21,7 +21,8 @@
     "test": "vitest run --typecheck",
     "lint": "eslint ./ --ext=js,ts",
     "prettier": "prettier . --cache",
-    "fix": "pnpm lint --fix && pnpm prettier --write"
+    "fix": "pnpm lint --fix && pnpm prettier --write",
+    "perf": "tsc --noEmit --extendedDiagnostics --p ./performance/tsconfig.json"
   },
   "keywords": [
     "ts",
