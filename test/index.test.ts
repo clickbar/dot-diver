@@ -144,7 +144,6 @@ it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
     object: T,
     path: P,
   ): PathValue<T, P, 5> {
-
     return getByPath(object, path) as PathValue<T, P, 5>
   }
 

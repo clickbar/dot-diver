@@ -7,9 +7,8 @@
  * from type-fest
  * @see https://github.com/sindresorhus/type-fest/blob/fa1c3f3cf49c4d5aae9da47c04320d1934cb2f9b/source/is-equal.d.ts#L29
  */
-export type IsEqual<A, B> = (<G>() => G extends A ? 1 : 2) extends <G>() => G extends B ? 1 : 2
-  ? true
-  : false
+export type IsEqual<A, B> =
+  (<G>() => G extends A ? 1 : 2) extends <G>() => G extends B ? 1 : 2 ? true : false
 
 // check if a type is null or undefined
 type IsNullableOrUndefineable<T> = null extends T ? true : undefined extends T ? true : false
@@ -154,20 +153,18 @@ type GetArrayPaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
   | `${number}.${TraversalGate<GetArrayElement<T>, DepthCarry, Config>}`
 
 // get all possible paths of a tuple
-type GetTuplePaths<T, DepthCarry extends unknown[], Config extends PathConfig> = Extract<
-  keyof T,
-  `${number}`
-> extends infer P
-  ? P extends `${infer PV extends number}`
-    ?
-        | (Config['onlyWriteable'] extends true
-            ? ArrayIsReadonlyArray<T> extends true
-              ? never
-              : PV
-            : PV)
-        | `${PV}.${TraversalGate<TupleElement<T, PV>, DepthCarry, Config>}`
+type GetTuplePaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
+  Extract<keyof T, `${number}`> extends infer P
+    ? P extends `${infer PV extends number}`
+      ?
+          | (Config['onlyWriteable'] extends true
+              ? ArrayIsReadonlyArray<T> extends true
+                ? never
+                : PV
+              : PV)
+          | `${PV}.${TraversalGate<TupleElement<T, PV>, DepthCarry, Config>}`
+      : never
     : never
-  : never
 
 /**
  * PathConfig is a configuration object that can be used to configure the behavior of the path function.
@@ -189,7 +186,6 @@ type DefaultPathConfig = {
 type MergeWithDefaultPathConfig<T extends Partial<PathConfig>> = {
   [K in keyof PathConfig]: T[K] extends PathConfig[K] ? T[K] : DefaultPathConfig[K]
 }
-
 
 /* -------------------------------------------------------------------------- */
 /*                                 Simple Path                                */
@@ -219,17 +215,14 @@ type MergeWithDefaultPathConfig<T extends Partial<PathConfig>> = {
  * @typeParam DepthCarry - Tuple that is the size of the remaining depth level
  * @typeParam Config - Configuration object
  */
-type TraversalStep<
-  T,
-  DepthCarry extends unknown[],
-  Config extends PathConfig,
-> = IsTuple<T> extends true
-  ? GetTuplePaths<T, DepthCarry, Config>
-  : IsArray<T> extends true
-  ? GetArrayPaths<T, DepthCarry, Config>
-  : HasIndexSignature<T> extends true
-  ? GetValidIndexSignature<T> | GetObjectPaths<RemoveIndexSignature<T>, DepthCarry, Config>
-  : GetObjectPaths<T, DepthCarry, Config>
+type TraversalStep<T, DepthCarry extends unknown[], Config extends PathConfig> =
+  IsTuple<T> extends true
+    ? GetTuplePaths<T, DepthCarry, Config>
+    : IsArray<T> extends true
+      ? GetArrayPaths<T, DepthCarry, Config>
+      : HasIndexSignature<T> extends true
+        ? GetValidIndexSignature<T> | GetObjectPaths<RemoveIndexSignature<T>, DepthCarry, Config>
+        : GetObjectPaths<T, DepthCarry, Config>
 
 /**
  * Checks for the remaining depth level and stops further traversal if necessary.
@@ -240,22 +233,18 @@ type TraversalStep<
  * @typeParam DepthCarry - Tuple that is the size of the remaining depth level
  * @typeParam Config - Configuration object
  */
-type TraversalGate<
-  T,
-  DepthCarry extends unknown[],
-  Config extends PathConfig,
-> = T extends T // spread the union if it is one
-  ?  IsAny<T> extends true
-  ? string
-  : IsUnknown<T> extends true
-  ? never
-  : IsPrimitive<T> extends true
-  ? never
-  : IsEmptyArray<T> extends true
-  ? never
-  : TupleLength<DepthCarry> extends 0
-  ? any
-  : TraversalStep<ExcludeNullUndefined<T>, MinusOne<DepthCarry>, Config>
+type TraversalGate<T, DepthCarry extends unknown[], Config extends PathConfig> = T extends T // spread the union if it is one
+  ? IsAny<T> extends true
+    ? string
+    : IsUnknown<T> extends true
+      ? never
+      : IsPrimitive<T> extends true
+        ? never
+        : IsEmptyArray<T> extends true
+          ? never
+          : TupleLength<DepthCarry> extends 0
+            ? any
+            : TraversalStep<ExcludeNullUndefined<T>, MinusOne<DepthCarry>, Config>
   : never
 
 /**
@@ -264,7 +253,7 @@ type TraversalGate<
  * @typeParam T - Type to traverse
  * @typeParam Config - Configuration object
  */
-export type SimplePath<T, Config extends PathConfig> = TraversalGate<
+type SimplePath<T, Config extends PathConfig> = TraversalGate<
   T,
   BuildTuple<Config['depth']>,
   Config
@@ -287,25 +276,22 @@ export type SimplePath<T, Config extends PathConfig> = TraversalGate<
  * @typeParam Config - Configuration object
  * @typeParam Offset - Offset path
  */
-type PathWithOffset<
-  T,
-  Config extends PathConfig,
-  Offset extends string | number,
-> = IsAny<Offset> extends true
-  ? SimplePath<T, Config>
-  : IsNever<Offset> extends true
-  ? SimplePath<T, Config>
-  : Offset extends `${string}.${string}`
-  ? BeforeLast<Offset, '.'> extends infer H
-    ? H extends string | number
-      ? PathValue<T, H> extends infer V
-        ? IsNever<V> extends true
-          ? SimplePath<T, Config>
-          : `${H}.${SimplePath<V, Config>}`
+type PathWithOffset<T, Config extends PathConfig, Offset extends string | number> =
+  IsAny<Offset> extends true
+    ? SimplePath<T, Config>
+    : IsNever<Offset> extends true
+      ? SimplePath<T, Config>
+      : Offset extends `${string}.${string}`
+        ? BeforeLast<Offset, '.'> extends infer H
+          ? H extends string | number
+            ? PathValue<T, H> extends infer V
+              ? IsNever<V> extends true
+                ? SimplePath<T, Config>
+                : `${H}.${SimplePath<V, Config>}`
+              : SimplePath<T, Config>
+            : never
+          : never
         : SimplePath<T, Config>
-      : never
-    : never
-  : SimplePath<T, Config>
 
 /**
  *
@@ -327,10 +313,10 @@ type CircularConstraintPathHelper<
 > = P[number] extends never
   ? SimplePath<T, Config>
   : P[number] extends infer PV
-  ? PV extends string | number
-    ? PathWithOffset<T, Config, PV>
+    ? PV extends string | number
+      ? PathWithOffset<T, Config, PV>
+      : SimplePath<T, Config>
     : SimplePath<T, Config>
-  : SimplePath<T, Config>
 
 /**
  * Path return all paths in the given type and returns them until it reaches its max depth.
@@ -342,61 +328,55 @@ type CircularConstraintPathHelper<
  * @typeParam Config - Configuration object
  *
  */
-type Path<T, Offset = never, Config extends Partial<PathConfig> = object> = CircularConstraintPathHelper<T, MergeWithDefaultPathConfig<Config>, [Offset]>
+type Path<
+  T,
+  Offset = never,
+  Config extends Partial<PathConfig> = object,
+> = CircularConstraintPathHelper<T, MergeWithDefaultPathConfig<Config>, [Offset]>
 
 /* -------------------------------------------------------------------------- */
 /*                                 Path Value                                 */
 /* -------------------------------------------------------------------------- */
 
-type ValueTraversalStep<
-  T,
-  P,
-  DepthCarry extends unknown[],
-> = IsAny<T> extends true
-  ? any
-  : IsUnknown<T> extends true
-  ? unknown
-  : IsNullableOrUndefineable<T> extends true
-  ? ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
-  : IsTuple<T> extends true
-  ? P extends `${infer H extends number}.${infer R}`
-    ? ValueTraversalGate<TupleElement<T, H>, R, DepthCarry>
-    : P extends `${infer K extends number}`
-    ? TupleElement<T, K>
-    : undefined
-  : IsArray<T> extends true
-  ? P extends `${infer _H extends number}.${infer R}`
-    ? ValueTraversalGate<GetArrayElement<T>, R, DepthCarry> | undefined
-    : P extends `${infer _K extends number}`
-    ? GetArrayElement<T> | undefined
-    : undefined
-  : P extends `${infer H}.${infer R}`
-  ? H extends keyof T
-    ? ValueTraversalGate<T[H], R, DepthCarry> | (HasIndexSignature<T> extends true ? undefined : never)
-    : undefined
-  : P extends keyof T
-  ? T[P] | (HasIndexSignature<T> extends true ? undefined : never)
-  : undefined
+type ValueTraversalStep<T, P, DepthCarry extends unknown[]> =
+  IsAny<T> extends true
+    ? any
+    : IsUnknown<T> extends true
+      ? unknown
+      : IsNullableOrUndefineable<T> extends true
+        ? ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
+        : IsTuple<T> extends true
+          ? P extends `${infer H extends number}.${infer R}`
+            ? ValueTraversalGate<TupleElement<T, H>, R, DepthCarry>
+            : P extends `${infer K extends number}`
+              ? TupleElement<T, K>
+              : undefined
+          : IsArray<T> extends true
+            ? P extends `${infer _H extends number}.${infer R}`
+              ? ValueTraversalGate<GetArrayElement<T>, R, DepthCarry> | undefined
+              : P extends `${infer _K extends number}`
+                ? GetArrayElement<T> | undefined
+                : undefined
+            : P extends `${infer H}.${infer R}`
+              ? H extends keyof T
+                ?
+                    | ValueTraversalGate<T[H], R, DepthCarry>
+                    | (HasIndexSignature<T> extends true ? undefined : never)
+                : undefined
+              : P extends keyof T
+                ? T[P] | (HasIndexSignature<T> extends true ? undefined : never)
+                : undefined
 
-type ValueTraversalGate<
-  T,
-  P,
-  DepthCarry extends unknown[],
-> = TupleLength<DepthCarry> extends 0
-  ? unknown
-  : T extends T
-  ? ValueTraversalStep<Writeable<T>, P, MinusOne<DepthCarry>>
-  : never
+type ValueTraversalGate<T, P, DepthCarry extends unknown[]> =
+  TupleLength<DepthCarry> extends 0
+    ? unknown
+    : T extends T
+      ? ValueTraversalStep<Writeable<T>, P, MinusOne<DepthCarry>>
+      : never
 
-type PathValue<
-  T,
-  P extends string | number,
-  Depth extends number = 40,
-> = P extends '' ? T : ValueTraversalGate<
-  T,
-  `${P}`,
-  BuildTuple<Depth>
->
+type PathValue<T, P extends string | number, Depth extends number = 40> = P extends ''
+  ? T
+  : ValueTraversalGate<T, `${P}`, BuildTuple<Depth>>
 
 type SafeObject = Record<string, unknown>
 type SearchableObject = object
@@ -447,11 +427,7 @@ function throwAssignmentError(current: unknown, path: string): never {
   throw new TypeError(`Cannot create property '${path}' on ${type}`)
 }
 
-type SetPathValue<
-  T,
-  P extends string | number,
-  Depth extends number = 40,
-> = PathValue<T, P, Depth>
+type SetPathValue<T, P extends string | number, Depth extends number = 40> = PathValue<T, P, Depth>
 
 /**
  * Sets a value in an object by dot notation. If an intermediate property is undefined,
