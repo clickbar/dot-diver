@@ -133,7 +133,7 @@ type BuildTuple<L extends number, T extends unknown[] = []> = T extends {
 /* -------------------------------------------------------------------------- */
 
 // get all possible paths of an object
-type GetObjectPaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
+type GetObjectPaths<T, DepthCarry extends unknown[], Config extends BasePathConfig> =
   | (Config['onlyWriteable'] extends true
       ? RemoveInvalidDotPathKeys<keyof RemoveReadonlyProperties<T>>
       : RemoveInvalidDotPathKeys<keyof T>)
@@ -144,7 +144,7 @@ type GetObjectPaths<T, DepthCarry extends unknown[], Config extends PathConfig> 
       : never)
 
 // get all possible paths of an array
-type GetArrayPaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
+type GetArrayPaths<T, DepthCarry extends unknown[], Config extends BasePathConfig> =
   | (Config['onlyWriteable'] extends true
       ? ArrayIsReadonlyArray<T> extends true
         ? never
@@ -153,7 +153,7 @@ type GetArrayPaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
   | `${number}.${TraversalGate<GetArrayElement<T>, DepthCarry, Config>}`
 
 // get all possible paths of a tuple
-type GetTuplePaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
+type GetTuplePaths<T, DepthCarry extends unknown[], Config extends BasePathConfig> =
   Extract<keyof T, `${number}`> extends infer P
     ? P extends `${infer PV extends number}`
       ?
@@ -172,19 +172,37 @@ type GetTuplePaths<T, DepthCarry extends unknown[], Config extends PathConfig> =
  * @property onlyWriteable - If true, only writeable properties are returned
  * @property depth - The maximum depth the path function should traverse
  */
-type PathConfig = {
+interface BasePathConfig {
   depth: number
   onlyWriteable: boolean
 }
 
 // Default configuration
-type DefaultPathConfig = {
+interface GetByPathConfig extends BasePathConfig {
   depth: 3
   onlyWriteable: false
 }
 
-type MergeWithDefaultPathConfig<T extends Partial<PathConfig>> = {
-  [K in keyof PathConfig]: T[K] extends PathConfig[K] ? T[K] : DefaultPathConfig[K]
+interface SetByPathConfig extends BasePathConfig {
+  depth: 3
+  onlyWriteable: true
+}
+
+/**
+ * Checks if a given value of type Type is an actual value of the type.
+ * E.g. if Type is number and Value is 5, it will return 5.
+ * If Type is number and Value is string, it will return Default.
+ * If Type is number and Value is number, it will return Default.
+ */
+type GetActualValue<Type, Value, Default> = [Value] extends [Type]
+  ? [Type] extends [Value]
+    ? Default
+    : Value
+  : Default
+
+type PathConfig<Config extends Partial<BasePathConfig>> = {
+  depth: GetActualValue<number, Config['depth'], 3>
+  onlyWriteable: GetActualValue<boolean, Config['onlyWriteable'], false>
 }
 
 /* -------------------------------------------------------------------------- */
@@ -215,7 +233,7 @@ type MergeWithDefaultPathConfig<T extends Partial<PathConfig>> = {
  * @typeParam DepthCarry - Tuple that is the size of the remaining depth level
  * @typeParam Config - Configuration object
  */
-type TraversalStep<T, DepthCarry extends unknown[], Config extends PathConfig> =
+type TraversalStep<T, DepthCarry extends unknown[], Config extends BasePathConfig> =
   IsTuple<T> extends true
     ? GetTuplePaths<T, DepthCarry, Config>
     : IsArray<T> extends true
@@ -233,7 +251,7 @@ type TraversalStep<T, DepthCarry extends unknown[], Config extends PathConfig> =
  * @typeParam DepthCarry - Tuple that is the size of the remaining depth level
  * @typeParam Config - Configuration object
  */
-type TraversalGate<T, DepthCarry extends unknown[], Config extends PathConfig> = T extends T // spread the union if it is one
+type TraversalGate<T, DepthCarry extends unknown[], Config extends BasePathConfig> = T extends T // spread the union if it is one
   ? IsAny<T> extends true
     ? string
     : IsUnknown<T> extends true
@@ -253,7 +271,7 @@ type TraversalGate<T, DepthCarry extends unknown[], Config extends PathConfig> =
  * @typeParam T - Type to traverse
  * @typeParam Config - Configuration object
  */
-type SimplePath<T, Config extends PathConfig> = TraversalGate<
+type SimplePath<T, Config extends BasePathConfig> = TraversalGate<
   T,
   BuildTuple<Config['depth']>,
   Config
@@ -276,7 +294,7 @@ type SimplePath<T, Config extends PathConfig> = TraversalGate<
  * @typeParam Config - Configuration object
  * @typeParam Offset - Offset path
  */
-type PathWithOffset<T, Config extends PathConfig, Offset extends string | number> =
+type PathWithOffset<T, Config extends BasePathConfig, Offset extends string | number> =
   IsAny<Offset> extends true
     ? SimplePath<T, Config>
     : IsNever<Offset> extends true
@@ -308,7 +326,7 @@ type PathWithOffset<T, Config extends PathConfig, Offset extends string | number
  */
 type CircularConstraintPathHelper<
   T,
-  Config extends PathConfig,
+  Config extends BasePathConfig,
   P extends unknown[],
 > = P[number] extends never
   ? SimplePath<T, Config>
@@ -331,8 +349,8 @@ type CircularConstraintPathHelper<
 type Path<
   T,
   Offset = never,
-  Config extends Partial<PathConfig> = object,
-> = CircularConstraintPathHelper<T, MergeWithDefaultPathConfig<Config>, [Offset]>
+  Config extends Partial<BasePathConfig> = GetByPathConfig,
+> = CircularConstraintPathHelper<T, PathConfig<Config>, [Offset]>
 
 /* -------------------------------------------------------------------------- */
 /*                                 Path Value                                 */
@@ -446,7 +464,7 @@ type SetPathValue<T, P extends string | number, Depth extends number = 40> = Pat
  */
 function setByPath<
   T extends SearchableObject,
-  P extends Path<T, P, { onlyWriteable: true }>,
+  P extends Path<T, P, SetByPathConfig>,
   V extends SetPathValue<T, P>,
 >(object: T, path: P & string, value: V): void {
   const pathArray = path.split('.')
