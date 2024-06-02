@@ -70,7 +70,7 @@ it('symbol index signature gets ignored', () => {
 it('Arrays can be accessed with number', () => {
   const test: string[] = ['a', 'b', 'c']
 
-  expectTypeOf<Path<typeof test>>().toEqualTypeOf<number>()
+  expectTypeOf<Path<typeof test>>().toEqualTypeOf<number | `${number}`>()
 
   const testObject = {
     array: test,
@@ -102,34 +102,44 @@ it('nullable arrays can be accessed with number', () => {
 /* -------------------------------------------------------------------------- */
 
 it('Tuples can be accessed with number', () => {
-  type TestType = ['a', 'b', 'c']
+  type TestTupleType = ['a', 'b', 'c']
+  type ExpectedTuplePaths = 0 | 1 | 2
+  type ResultTuplePaths = Path<TestTupleType>
 
-  expectTypeOf<Path<TestType>>().toEqualTypeOf<0 | 1 | 2>()
+  expectTypeOf<ResultTuplePaths>().toEqualTypeOf<ExpectedTuplePaths>()
 
-  interface TestTypeObject {
-    tuple: TestType
+  interface TestInterface {
+    tuple: TestTupleType
   }
 
-  type ExpectedType = 'tuple' | `tuple.${0 | 1 | 2}`
+  type ExpectedInterfacePaths = 'tuple' | `tuple.${0 | 1 | 2}`
 
-  expectTypeOf<Path<TestTypeObject>>().toEqualTypeOf<ExpectedType>()
+  type ResultInterfacePaths = Path<TestInterface>
+
+  expectTypeOf<ResultInterfacePaths>().toEqualTypeOf<ExpectedInterfacePaths>()
 
   // @ts-expect-error - string is not a number
-  expectTypeOf<Path<TestType>>().toEqualTypeOf<'tuple' | `tuple.${string}`>()
+  expectTypeOf<Path<TestTupleType>>().toEqualTypeOf<'tuple' | `tuple.${string}`>()
 })
 
 it('Tuples/Arrays with specific length can be accessed with number', () => {
-  type TestType = [string] // length 1
+  type TestTupleTypeOfLength1 = [string] // length 1
+  type ExpectedTuplePathsOfLength1 = 0
+  type ResultTuplePathsOfLength1 = Path<TestTupleTypeOfLength1>
 
-  expectTypeOf<Path<TestType>>().toEqualTypeOf<0>()
+  expectTypeOf<ResultTuplePathsOfLength1>().toEqualTypeOf<ExpectedTuplePathsOfLength1>()
 
-  type EmptyTestType = [] // length 0
+  type TestEmptyArrayType = [] // length 0
+  type ExpectedEmptyArrayPaths = never
+  type ResultEmptyArrayPaths = Path<TestEmptyArrayType>
 
-  expectTypeOf<Path<EmptyTestType>>().toEqualTypeOf<never>()
+  expectTypeOf<ResultEmptyArrayPaths>().toEqualTypeOf<ExpectedEmptyArrayPaths>()
 
-  type NotEmptyArray = string[]
+  type TestNotEmptyArray = string[]
+  type ExpectedNotEmptyArrayPaths = number | `${number}`
+  type ResultNotEmptyArrayPaths = Path<TestNotEmptyArray>
 
-  expectTypeOf<Path<NotEmptyArray>>().toEqualTypeOf<number>()
+  expectTypeOf<ResultNotEmptyArrayPaths>().toEqualTypeOf<ExpectedNotEmptyArrayPaths>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -200,8 +210,9 @@ it('Readonly tuples can be accessed', () => {
   }
 
   type ExpectedType = 'tuple' | `tuple.${0 | 1 | 2}`
+  type ResultType = Path<TestType>
 
-  expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedType>()
+  expectTypeOf<ResultType>().toEqualTypeOf<ExpectedType>()
 })
 
 it('Readonly objects can be accessed', () => {
@@ -484,7 +495,6 @@ it('PathValue works with index signatures defined via Record<X,Y>', () => {
   type TestType = Record<string, string>
 
   expectTypeOf<PathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
-  // @ts-expect-error TypeScripts keyof index signatures in Records are constrained to their generic parameter
   expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
 })
 
@@ -556,7 +566,7 @@ it('PathValue works with unions', () => {
 
   expectTypeOf<PathValue<TestType2, 'union'>>().toEqualTypeOf<string | { a: string }>()
 
-  expectTypeOf<PathValue<TestType2, 'union.a'>>().toEqualTypeOf<string>()
+  expectTypeOf<PathValue<TestType2, 'union.a'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with tuples', () => {
@@ -645,9 +655,9 @@ it('Test readme usage example: 🔄 Objects with cyclic dependency', () => {
   }
 
   // Example 1: Using the Path type with a Depth limit
-  type NodePathsDepth2 = Path<Node, 2> // Depth limit of 2
+  type NodePathsDepth2 = Path<Node, never, { depth: 2 }> // Depth limit of 2
 
-  // NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 3:
+  // NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 2:
   // 'id' | 'label' | 'parent' | 'children' | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.${any}` | `parent.children.${any}` | `children.${number}` | `children.${number}.${any}`
   expectTypeOf<NodePathsDepth2>().toEqualTypeOf<
     | 'id'
@@ -665,12 +675,155 @@ it('Test readme usage example: 🔄 Objects with cyclic dependency', () => {
   >()
 
   // Example 2: Using the PathValue type with a Depth limit
-  type ValueAtPathParent_Id = PathValue<Node, 'parent.id', 3> // Output: number
+  type ValueAtPathParent_Id = PathValue<Node, 'parent.id', 2> // Output: number
   expectTypeOf<ValueAtPathParent_Id>().toEqualTypeOf<number>()
 
   type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Output: string | undefined
   expectTypeOf<ValueAtPathChildren_0_Label>().toEqualTypeOf<string | undefined>()
 
-  type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
+  type ValueAtPathParent_Parent_Parent = PathValue<
+    Node,
+    'parent.parent.parent.parent',
+    3
+  > // Output: unknown (due to the depth limit)
   expectTypeOf<ValueAtPathParent_Parent_Parent>().toEqualTypeOf<unknown>()
+})
+
+/* ------------------------------- Union Test ------------------------------- */
+it('Can extract all possible paths from a union of types', () => {
+  type TestType =
+    | { a: string }
+    | { b: number }
+    | { c: { d: string } }
+    | { e: { f: { g: string } }[] }
+    | number[]
+    | (() => void)[]
+
+  type ExpectedPaths =
+    | 'a'
+    | 'b'
+    | 'c'
+    | 'c.d'
+    | 'e'
+    | `e.${number}`
+    | `e.${number}.f`
+    | `e.${number}.f.g`
+    | number
+    | `${number}`
+
+  expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedPaths>
+})
+
+it('Adds undefined if it is uncertain if the property exists', () => {
+  type TestType =
+    | { a: string }
+    | { b: number }
+    | { c: { d: string } }
+    | number[]
+    | { e: { f: { g: string } }[] }
+    | (() => void)[]
+
+  expectTypeOf<PathValue<TestType, 'a'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<PathValue<TestType, 'b'>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<PathValue<TestType, 'c'>>().toEqualTypeOf<{ d: string } | undefined>()
+  expectTypeOf<PathValue<TestType, 'c.d'>>().toEqualTypeOf<string | undefined>()
+
+  expectTypeOf<PathValue<TestType, 'e'>>().toEqualTypeOf<{ f: { g: string } }[] | undefined>()
+  expectTypeOf<PathValue<TestType, 'e.0'>>().toEqualTypeOf<{ f: { g: string } } | undefined>()
+  expectTypeOf<PathValue<TestType, 'e.0.f'>>().toEqualTypeOf<{ g: string } | undefined>()
+  expectTypeOf<PathValue<TestType, 'e.0.f.g'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<PathValue<TestType, 'e.1.f.g'>>().toEqualTypeOf<string | undefined>()
+
+  expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<number | (() => void) | undefined>()
+  expectTypeOf<PathValue<TestType, `${number}`>>().toEqualTypeOf<
+    number | (() => void) | undefined
+  >()
+})
+
+it('Does not need to add undefined if it is certain that the property exists', () => {
+  type TestType = { a: string } | { a: number } | { a: { b: string } } | { a: { b: string }[] }
+
+  type ExpectedValue = string | number | { b: string } | { b: string }[]
+
+  expectTypeOf<PathValue<TestType, 'a'>>().toEqualTypeOf<ExpectedValue>()
+
+  type TestType2 = TestType | { a?: boolean }
+
+  type ExpectedValue2 = ExpectedValue | boolean | undefined
+
+  expectTypeOf<PathValue<TestType2, 'a'>>().toEqualTypeOf<ExpectedValue2>()
+})
+
+/* ----------------------------- Readonly Config ---------------------------- */
+
+it('Readonly config works with Path', () => {
+  type TestObject = {
+    a: string
+    readonly b: number
+    c: { d: string; readonly e: { f: string } }
+    readonly g: { h: string }
+    readonly i: { j: string }[]
+  }
+
+  type TestObjectExpectedPaths =
+    | 'a'
+    | 'c'
+    | 'c.d'
+    | 'c.e.f'
+    | 'g.h'
+    | `i.${number}`
+    | `i.${number}.j`
+
+  type TestObjectPathsResult = Path<TestObject, never, { onlyWriteable: true }>
+
+  expectTypeOf<TestObjectPathsResult>().toEqualTypeOf<TestObjectExpectedPaths>()
+
+  type TestArray = readonly { a: number }[]
+
+  type TestArrayExpectedPaths = `${number}.a`
+
+  type TestArrayResult = Path<TestArray, never, { onlyWriteable: true }>
+
+  expectTypeOf<TestArrayResult>().toEqualTypeOf<TestArrayExpectedPaths>()
+
+  type TestTuple = readonly [{ a: string }, { b: number }, { c: boolean }]
+
+  type TestTupleExpectedPaths = '0.a' | '1.b' | '2.c'
+
+  type TestTupleResult = Path<TestTuple, never, { onlyWriteable: true }>
+
+  expectTypeOf<TestTupleResult>().toEqualTypeOf<TestTupleExpectedPaths>()
+
+  interface TestInterface {
+    a: string
+    readonly b: number
+    c: { d: string; readonly e: { f: string } }
+    readonly g: { h: string }
+    readonly i: { j: string }[]
+  }
+
+  type TestInterfaceExpectedPaths =
+    | 'a'
+    | 'c'
+    | 'c.d'
+    | 'c.e.f'
+    | 'g.h'
+    | `i.${number}`
+    | `i.${number}.j`
+
+  type TestInterfaceResult = Path<TestInterface, never, { onlyWriteable: true }>
+
+  expectTypeOf<TestInterfaceResult>().toEqualTypeOf<TestInterfaceExpectedPaths>()
+
+  type TestUnion = TestObject | TestArray | TestTuple | TestInterface
+
+  type TestUnionExpectedPaths =
+    | TestObjectExpectedPaths
+    | TestArrayExpectedPaths
+    | TestTupleExpectedPaths
+    | TestInterfaceExpectedPaths
+
+  type TestUnionResult = Path<TestUnion, never, { onlyWriteable: true }>
+
+  expectTypeOf<TestUnionResult>().toEqualTypeOf<TestUnionExpectedPaths>()
 })
