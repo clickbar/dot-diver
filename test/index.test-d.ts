@@ -1,6 +1,6 @@
-import { it, expectTypeOf } from 'vitest'
+import { it, expectTypeOf, test } from 'vitest'
 
-import type { Path, PathValue } from '../src'
+import { type Path, type PathValue } from '../src'
 
 /* -------------------------------------------------------------------------- */
 /*                               Primitive Tests                              */
@@ -754,15 +754,18 @@ it('Does not need to add undefined if it is certain that the property exists', (
   expectTypeOf<PathValue<TestType2, 'a'>>().toEqualTypeOf<ExpectedValue2>()
 })
 
-/* ----------------------------- Readonly Config ---------------------------- */
-
-it('Readonly config works with Path', () => {
+/**
+ * We added onlyWriteable to the config to allow only writeable properties to be set.
+ * @see https://github.com/clickbar/dot-diver/issues/3
+ */
+test('Readonly config works with Path', () => {
   type TestObject = {
     a: string
     readonly b: number
     c: { d: string; readonly e: { f: string } }
     readonly g: { h: string }
     readonly i: { j: string }[]
+    k: readonly { l: string }[]
   }
 
   type TestObjectExpectedPaths =
@@ -773,6 +776,8 @@ it('Readonly config works with Path', () => {
     | 'g.h'
     | `i.${number}`
     | `i.${number}.j`
+    | `k`
+    | `k.${number}.l`
 
   type TestObjectPathsResult = Path<TestObject, never, { onlyWriteable: true }>
 
@@ -826,4 +831,99 @@ it('Readonly config works with Path', () => {
   type TestUnionResult = Path<TestUnion, never, { onlyWriteable: true }>
 
   expectTypeOf<TestUnionResult>().toEqualTypeOf<TestUnionExpectedPaths>()
+})
+
+/**
+ * Test cases for union types.
+ * 'undefined' gets added as a type, if we traverse through a union and one of the members does not have the property
+ * referenced by the given path.
+ *
+ * @see https://github.com/clickbar/dot-diver/issues/4
+ */
+test('PathValue properly handles union types', () => {
+  type TestObject = {
+    a: string | { b: number }
+    c: { d: string | { e: boolean } }
+    f: [{ g: string; h: number } | { g: number; h: number; i: boolean }]
+    j: { k: string }[] | number
+    l: string | string[]
+  }
+
+  expectTypeOf<PathValue<TestObject, 'a'>>().toEqualTypeOf<string | { b: number }>()
+  expectTypeOf<PathValue<TestObject, 'a.b'>>().toEqualTypeOf<number | undefined>()
+
+  expectTypeOf<PathValue<TestObject, 'c.d'>>().toEqualTypeOf<string | { e: boolean }>()
+  expectTypeOf<PathValue<TestObject, 'c.d.e'>>().toEqualTypeOf<boolean | undefined>()
+
+  expectTypeOf<PathValue<TestObject, 'f.0'>>().toEqualTypeOf<{ g: string; h: number } | { g: number; h: number; i: boolean }>()
+  expectTypeOf<PathValue<TestObject, 'f.0.g'>>().toEqualTypeOf<string | number>()
+  expectTypeOf<PathValue<TestObject, 'f.0.h'>>().toEqualTypeOf<number>()
+  expectTypeOf<PathValue<TestObject, 'f.0.i'>>().toEqualTypeOf<boolean | undefined>()
+
+  expectTypeOf<PathValue<TestObject, 'j'>>().toEqualTypeOf<{ k: string }[] | number>()
+  expectTypeOf<PathValue<TestObject, 'j.0.k'>>().toEqualTypeOf<string | undefined>()
+
+  expectTypeOf<PathValue<TestObject, 'l'>>().toEqualTypeOf<string | string[]>()
+  expectTypeOf<PathValue<TestObject, 'l.0'>>().toEqualTypeOf<string | undefined>()
+})
+
+/**
+ * Path will only return paths, starting from the last point in the offset.
+ * This enhances performance, since we only need to look a few levels ahead, instead of the whole object.
+ * This also fixes path truncating partially, if the truncating part is included in the offset.
+ *
+ * @see https://github.com/clickbar/dot-diver/issues/2
+ */
+it('Returns correct paths after offset', () => {
+  type User = {
+    name: string
+    age: number
+    address: {
+      street: string
+      city: string
+      country: string
+    }
+    friends: User[]
+    relations: Record<string, User>
+  }
+
+  type NestedAddressPaths = Path<User, 'address.'>
+
+  expectTypeOf<NestedAddressPaths>().toEqualTypeOf<'address.street' | 'address.city' | 'address.country'>()
+
+  type NestedRelationsPaths = Path<User, 'relations.'>
+
+  expectTypeOf<NestedRelationsPaths>().toEqualTypeOf<`relations.${string}`>()
+
+  /**
+   * We only use a depth of 1 here, for an easier comparison.
+   * This also checks for https://github.com/clickbar/dot-diver/issues/2 since the path gets no longer
+   * truncated after the 'relations' property.
+   */
+  type PathsOfNestedRelation = Path<User, 'relations.mother.', { depth: 1 }>
+
+  type ExpectedPathsOfNestedRelation =
+    | `relations.mother.name`
+    | `relations.mother.age`
+    | `relations.mother.address`
+    | `relations.mother.address.${any}`
+    | `relations.mother.friends`
+    | `relations.mother.friends.${any}`
+    | `relations.mother.relations`
+    | `relations.mother.relations.${any}`
+
+  expectTypeOf<PathsOfNestedRelation>().toEqualTypeOf<ExpectedPathsOfNestedRelation>()
+})
+
+
+/**
+ * We handle an empty path by returning the object itself instead of a property of the object.
+ * This diverges from the default behavior, but is probably more intuitive and useful in most cases.
+ *
+ * @see https://github.com/clickbar/dot-diver/issues/30
+ */
+it('Returns the object itself if the path is empty', () => {
+  type TestType = { a: string }
+
+  expectTypeOf<PathValue<TestType, ''>>().toEqualTypeOf<TestType>()
 })
