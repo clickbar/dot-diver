@@ -681,11 +681,7 @@ it('Test readme usage example: 🔄 Objects with cyclic dependency', () => {
   type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Output: string | undefined
   expectTypeOf<ValueAtPathChildren_0_Label>().toEqualTypeOf<string | undefined>()
 
-  type ValueAtPathParent_Parent_Parent = PathValue<
-    Node,
-    'parent.parent.parent.parent',
-    3
-  > // Output: unknown (due to the depth limit)
+  type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
   expectTypeOf<ValueAtPathParent_Parent_Parent>().toEqualTypeOf<unknown>()
 })
 
@@ -855,7 +851,9 @@ test('PathValue properly handles union types', () => {
   expectTypeOf<PathValue<TestObject, 'c.d'>>().toEqualTypeOf<string | { e: boolean }>()
   expectTypeOf<PathValue<TestObject, 'c.d.e'>>().toEqualTypeOf<boolean | undefined>()
 
-  expectTypeOf<PathValue<TestObject, 'f.0'>>().toEqualTypeOf<{ g: string; h: number } | { g: number; h: number; i: boolean }>()
+  expectTypeOf<PathValue<TestObject, 'f.0'>>().toEqualTypeOf<
+    { g: string; h: number } | { g: number; h: number; i: boolean }
+  >()
   expectTypeOf<PathValue<TestObject, 'f.0.g'>>().toEqualTypeOf<string | number>()
   expectTypeOf<PathValue<TestObject, 'f.0.h'>>().toEqualTypeOf<number>()
   expectTypeOf<PathValue<TestObject, 'f.0.i'>>().toEqualTypeOf<boolean | undefined>()
@@ -889,7 +887,9 @@ it('Returns correct paths after offset', () => {
 
   type NestedAddressPaths = Path<User, 'address.'>
 
-  expectTypeOf<NestedAddressPaths>().toEqualTypeOf<'address.street' | 'address.city' | 'address.country'>()
+  expectTypeOf<NestedAddressPaths>().toEqualTypeOf<
+    'address.street' | 'address.city' | 'address.country'
+  >()
 
   type NestedRelationsPaths = Path<User, 'relations.'>
 
@@ -914,7 +914,6 @@ it('Returns correct paths after offset', () => {
 
   expectTypeOf<PathsOfNestedRelation>().toEqualTypeOf<ExpectedPathsOfNestedRelation>()
 })
-
 
 /**
  * We handle an empty path by returning the object itself instead of a property of the object.
