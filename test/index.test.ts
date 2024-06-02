@@ -150,7 +150,7 @@ it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   // eslint-disable-next-line unicorn/consistent-function-scoping
   function setByPathDepth5<
     T extends SearchableObject,
-    P extends Path<T, P, { onlyWriteable: true, depth: 5 }> & string,
+    P extends Path<T, P, { onlyWriteable: true; depth: 5 }> & string,
     V extends SetPathValue<T, P>,
   >(object: T, path: P, value: V): void {
     setByPath(object, path, value as SetPathValue<T, P>)
