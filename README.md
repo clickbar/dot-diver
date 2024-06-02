@@ -1,6 +1,6 @@
 # Dot Diver 🌊🔍
 
-A lightweight, powerful,  dependency-free and over engineered TypeScript utility library that provides types and functions to work with object paths in dot notation. Dive into your objects with ease, while maintaining complete type safety! 🎉
+A lightweight, powerful, dependency-free and over engineered TypeScript utility library that provides types and functions to work with object paths in dot notation. Dive into your objects with ease, while maintaining complete type safety! 🎉
 
 Dot notation is a popular and convenient way to access deeply nested properties in objects. With Dot Diver, you can safely work with object paths in TypeScript projects, ensuring complete type safety and avoiding runtime errors.
 
@@ -203,7 +203,7 @@ function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { dept
 
 function setByPathDepth5<
   T extends SearchableObject,
-  P extends Path<T, P, { onlyWriteable: true, depth: 5 }> & string,
+  P extends Path<T, P, { onlyWriteable: true; depth: 5 }> & string,
   V extends SetPathValue<T, P>,
 >(object: T, path: P, value: V): void {
   setByPath(object, path, value as SetPathValue<T, P>)
@@ -227,24 +227,24 @@ Paths get truncated, if they are unioned with a string. E.g. `keyof T | string`.
 This should only happen in rare cases for objects looking like this:
 
 ```typescript
-  type TestType = {
-    a: string
-    b: string
-    [key: string]: string
-  }
+type TestType = {
+  a: string
+  b: string
+  [key: string]: string
+}
 ```
 
 If your object has nested properties, for example looking like this:
 
-  ```typescript
-    type TestType = {
-      a: string
-      b: {
-        c: string
-      }
-      [key: string]: string
-    }
-  ```
+```typescript
+type TestType = {
+  a: string
+  b: {
+    c: string
+  }
+  [key: string]: string
+}
+```
 
 You will get auto completion again, as soon as you typed the path to the nested object, e.g. `b.`.
 
