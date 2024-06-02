@@ -703,7 +703,7 @@ it('Can extract all possible paths from a union of types', () => {
     | 'e'
     | `e.${number}`
     | `e.${number}.f`
-    | `e.${number}.f.g`
+    | `e.${number}.f.${any}`
     | number
     | `${number}`
 

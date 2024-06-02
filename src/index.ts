@@ -179,7 +179,7 @@ type PathConfig = {
 
 // Default configuration
 type DefaultPathConfig = {
-  depth: 4
+  depth: 3
   onlyWriteable: false
 }
 
