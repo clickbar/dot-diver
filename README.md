@@ -1,8 +1,8 @@
 # Dot Diver 🌊🔍
 
-A lightweight, powerful, and dependency-free TypeScript utility library that provides types and functions to work with object paths in dot notation. Dive into your objects with ease, while maintaining comprehensive type safety! 🎉
+A lightweight, powerful,  dependency-free and over engineered TypeScript utility library that provides types and functions to work with object paths in dot notation. Dive into your objects with ease, while maintaining complete type safety! 🎉
 
-Dot notation is a popular and convenient way to access deeply nested properties in objects. With Dot Diver, you can safely work with object paths in TypeScript projects, ensuring type correctness and productivity!
+Dot notation is a popular and convenient way to access deeply nested properties in objects. With Dot Diver, you can safely work with object paths in TypeScript projects, ensuring complete type safety and avoiding runtime errors.
 
 Example:
 
@@ -175,7 +175,7 @@ type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Out
 type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
 ```
 
-The default depth is currently **10**.\
+The default depth is currently **3**.\
 At the moment, it is not possible to customize it when using the provided `getByPath` and `setByPath` functions.
 This is further explained in this [issue](https://github.com/clickbar/dot-diver/issues/1).
 
@@ -194,26 +194,26 @@ import { getByPath, setByPath } from '@clickbar/dot-diver'
 
 import type { Path, SearchableObject, PathValue } from '@clickbar/dot-diver'
 
-function getByPathDepth5<T extends SearchableObject, P extends Path<T, 5> & string>(
+function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { depth: 5 }> & string>(
   object: T,
   path: P,
-): PathValue<T, P, 5> {
-  return getByPath(object, path) as PathValue<T, P, 5>
+): PathValue<T, P> {
+  return getByPath(object, path) as PathValue<T, P>
 }
 
 function setByPathDepth5<
   T extends SearchableObject,
-  P extends Path<T, 5> & string,
-  V extends PathValue<T, P, 5>,
+  P extends Path<T, P, { onlyWriteable: true, depth: 5 }> & string,
+  V extends SetPathValue<T, P>,
 >(object: T, path: P, value: V): void {
-  setByPath(object, path, value as PathValue<T, P>)
+  setByPath(object, path, value as SetPathValue<T, P>)
 }
 
 export { getByPathDepth5 as getByPath, setByPathDepth5 as setByPath }
 ```
 
-The intersection between `Path<T, 5>` and `string` is necessary for TypeScript to successfully narrow down the type of `P` based on the user-provided `path` input.
-Without the intersection, the `path` would just be of type `Path<T, 5>` and `PathValueEntry` would be a union of all possible return types.
+The intersection between `Path<T, P, { depth: 5 }>` and `string` is necessary for TypeScript to successfully narrow down the type of `P` based on the user-provided `path` input.
+Without the intersection, the `path` would just be of type `Path<T, P, { depth: 5 }>` and `PathValueEntry` would be a union of all possible return types.
 By using the intersection, TypeScript is forced to apply the `Path` constraints and infer the type from the provided user input.
 
 <br>
@@ -223,7 +223,30 @@ By using the intersection, TypeScript is forced to apply the `Path` constraints 
 
 ### ❗ Why are my paths truncated in a object with index signature?
 
-See this [issue](https://github.com/clickbar/dot-diver/issues/2).
+Paths get truncated, if they are unioned with a string. E.g. `keyof T | string`.\
+This should only happen in rare cases for objects looking like this:
+
+```typescript
+  type TestType = {
+    a: string
+    b: string
+    [key: string]: string
+  }
+```
+
+If your object has nested properties, for example looking like this:
+
+  ```typescript
+    type TestType = {
+      a: string
+      b: {
+        c: string
+      }
+      [key: string]: string
+    }
+  ```
+
+You will get auto completion again, as soon as you typed the path to the nested object, e.g. `b.`.
 
 <br>
 
@@ -248,7 +271,7 @@ type TestType = {
   d: {
     e: TestType
   }
-  f: TestType2
+  f: TestType
 }
 ```
 
