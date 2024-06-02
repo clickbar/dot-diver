@@ -263,7 +263,11 @@ it('Test for prototype pollution', () => {
   }).toThrowError('__proto__')
 })
 
-
+/**
+ * We handle an empty path by returning the object itself instead of a property of the object.
+ * This diverges from the default behavior, but is probably more intuitive and useful in most cases.
+ * @see https://github.com/clickbar/dot-diver/issues/30
+ */
 it('Returns the object itself, if the given path is empty', () => {
   const object = { test: 'ok' }
 
