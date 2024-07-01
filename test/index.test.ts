@@ -2,7 +2,7 @@ import { expect, it } from 'vitest'
 
 import { getByPath, setByPath } from '../src'
 
-import type { Path, SearchableObject, PathValue } from '../src'
+import type { Path, PathValue, SetPathValue, SearchableObject } from '../src'
 
 it('can get simple member', () => {
   const test = {
@@ -140,20 +140,20 @@ it('throws when setting invalid path', () => {
 
 it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   // eslint-disable-next-line unicorn/consistent-function-scoping
-  function getByPathDepth5<T extends SearchableObject, P extends Path<T, 5> & string>(
+  function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { depth: 5 }> & string>(
     object: T,
     path: P,
-  ): PathValue<T, P, 5> {
-    return getByPath(object, path) as PathValue<T, P, 5>
+  ): PathValue<T, P> {
+    return getByPath(object, path) as PathValue<T, P>
   }
 
   // eslint-disable-next-line unicorn/consistent-function-scoping
   function setByPathDepth5<
     T extends SearchableObject,
-    P extends Path<T, 5> & string,
-    V extends PathValue<T, P, 5>,
+    P extends Path<T, P, { onlyWriteable: true; depth: 5 }> & string,
+    V extends SetPathValue<T, P>,
   >(object: T, path: P, value: V): void {
-    setByPath(object, path, value as PathValue<T, P>)
+    setByPath(object, path, value as SetPathValue<T, P>)
   }
 
   // previous readme test still works
@@ -260,4 +260,15 @@ it('Test for prototype pollution', () => {
     // @ts-expect-error - this is not a valid path for the object
     setByPath(object3, '__proto__.polluted', true)
   }).toThrowError('__proto__')
+})
+
+/**
+ * We handle an empty path by returning the object itself instead of a property of the object.
+ * This diverges from the default behavior, but is probably more intuitive and useful in most cases.
+ * @see https://github.com/clickbar/dot-diver/issues/30
+ */
+it('Returns the object itself, if the given path is empty', () => {
+  const object = { test: 'ok' }
+
+  expect(getByPath(object, '')).toBe(object)
 })
