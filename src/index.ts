@@ -213,9 +213,6 @@ type PathValueEntry<T, P extends PathEntry<T, Depth>, Depth extends number = 10>
 type SafeObject = Record<string, unknown>
 type SearchableObject = object
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const hasOwnProperty = Object.prototype.hasOwnProperty
-
 /**
  * Retrieves a value from an object by dot notation. The value is received by optional chaining,
  * therefore this function returns undefined if an intermediate property is undefined.
@@ -238,8 +235,8 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
   return pathArray.reduce((current: unknown, pathPart) => {
     if (
       typeof current !== 'object' ||
-      current === null ||
-      !hasOwnProperty.call(current, pathPart)
+      // eslint-disable-next-line no-prototype-builtins
+      !current?.hasOwnProperty(pathPart) // We use the builtin to avoid reactivity issues with Proxy
     ) {
       return undefined
     }
@@ -283,8 +280,8 @@ function setByPath<
   const parentObject = pathArray.reduce<unknown>((current, pathPart) => {
     if (
       typeof current !== 'object' ||
-      current === null ||
-      !hasOwnProperty.call(current, pathPart)
+      // eslint-disable-next-line no-prototype-builtins
+      !current?.hasOwnProperty(pathPart)
     ) {
       throwAssignmentError(current, pathPart)
     }
