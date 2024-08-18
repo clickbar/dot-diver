@@ -14,8 +14,7 @@
     "noImplicitReturns": true,
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
-    "noEmit": true,
-    "allowJs": true
+    "noEmit": true
   },
-  "include": ["src", "test", "vite.config.ts", "eslint.config.js"]
+  "include": ["."]
 }

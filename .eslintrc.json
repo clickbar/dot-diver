@@ -1,8 +1,0 @@
-{
-  "root": true,
-  "extends": ["@clickbar/typescript"],
-  "rules": {
-    "@typescript-eslint/no-explicit-any": "off",
-    "unicorn/no-array-reduce": "off"
-  }
-}

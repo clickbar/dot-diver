@@ -1,8 +1,7 @@
 {
   "name": "@clickbar/dot-diver",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "description": "Types and utilities to access object properties by dot notation.",
-  "packageManager": "pnpm@8.8.0",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
@@ -19,9 +18,10 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest run --typecheck",
-    "lint": "eslint ./ --ext=js,ts",
+    "lint": "eslint ./",
     "prettier": "prettier . --cache",
-    "fix": "pnpm lint --fix && pnpm prettier --write"
+    "fix": "pnpm lint --fix && pnpm prettier --write",
+    "perf": "tsc --noEmit --extendedDiagnostics --p ./performance/tsconfig.json"
   },
   "keywords": [
     "ts",
@@ -45,13 +45,15 @@
     "Tobias Kröll <tk@clickbar.dev> (https://github.com/saibotk)"
   ],
   "devDependencies": {
-    "@clickbar/eslint-config-typescript": "^10.2.0",
-    "@types/node": "^20.12.12",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.11",
-    "vite-plugin-dts": "^3.9.1",
-    "vitest": "^1.6.0"
-  }
+    "@clickbar/eslint-config-typescript": "^11.0.4",
+    "@types/node": "^22.4.0",
+    "@vue/reactivity": "^3.4.38",
+    "eslint": "^9.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.1",
+    "vite-plugin-dts": "^4.0.3",
+    "vitest": "^2.0.5"
+  },
+  "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e"
 }
