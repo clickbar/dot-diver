@@ -707,7 +707,7 @@ it('Can extract all possible paths from a union of types', () => {
   expectTypeOf<Path<TestType>>().toEqualTypeOf<ExpectedPaths>
 })
 
-it('Adds undefined if it is uncertain if the property exists', () => {
+it('Adds undefined if it is uncertain if the property exists in a union', () => {
   type TestType =
     | { a: string }
     | { b: number }
@@ -733,7 +733,7 @@ it('Adds undefined if it is uncertain if the property exists', () => {
   >()
 })
 
-it('Does not need to add undefined if it is certain that the property exists', () => {
+it('Does not add undefined if it is certain that the property exists in a union', () => {
   type TestType = { a: string } | { a: number } | { a: { b: string } } | { a: { b: string }[] }
 
   type ExpectedValue = string | number | { b: string } | { b: string }[]
@@ -751,7 +751,7 @@ it('Does not need to add undefined if it is certain that the property exists', (
  * We added onlyWriteable to the config to allow only writeable properties to be set.
  * @see https://github.com/clickbar/dot-diver/issues/3
  */
-test('Readonly config works with Path', () => {
+test('Writeable config works with Path', () => {
   type TestObject = {
     a: string
     readonly b: number

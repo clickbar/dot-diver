@@ -75,7 +75,7 @@ type ExcludeNullUndefined<T> = Exclude<T, null | undefined>
 
 type IsEmptyArray<T> = T extends readonly [] ? true : false
 
-type IsTuple<T> = T extends readonly [any, ...any[]] ? true : false
+type IsTuple<T> = T extends readonly [unknown, ...unknown[]] ? true : false
 
 type TupleLength<T> = T extends { length: infer L } ? (L extends number ? L : never) : never
 
@@ -93,6 +93,12 @@ type RemoveReadonlyProperties<T> = {
     : never]: T[K]
 }
 
+/**
+ * Returns the substring between the last and second last occurrence of V in T.
+ * @example
+ * BeforeLast<'a.b.c.d', '.'> // 'c'
+ * BeforeLast<'a.b.c.d.e', '.'> // 'd'
+ */
 type BeforeLast<T extends string, V extends string | number> = T extends string
   ? T extends `${infer H}${V}${infer R}`
     ? R extends `${string}${V}${string}`
@@ -271,7 +277,7 @@ type SimplePath<T, Config extends BasePathConfig> = TraversalGate<
  * Similar to SimplePath, PathWithOffset return all paths in the given type and returns them until it reaches its max depth.
  *
  * The difference is that PathWithOffset allows to specify an offset to start the traversal from. It will start the traversal
- * by the last parent in the given offset.
+ * from the last parent at the given offset.
  *
  * a.b.c.d
  *     ^- return possible paths from here
@@ -304,8 +310,6 @@ type PathWithOffset<T, Config extends BasePathConfig, Offset extends string | nu
  *
  * This allows us to use the given path as the offset parameter for the path type.
  *
- * TODO: Find out why this works and if it may break in the future.
- *
  * @typeParam T - Type to traverse
  * @typeParam P - Should be a tuple with the path to traverse from as its only element, e.g. [P]
  * @typeParam Config - Configuration object
@@ -323,7 +327,7 @@ type CircularConstraintPathHelper<
     : SimplePath<T, Config>
 
 /**
- * Path return all paths in the given type and returns them until it reaches its max depth.
+ * Path returns all paths in the given type and returns them until it reaches its max depth.
  *
  * It uses the given path as the offset to start the traversal from.
  *
