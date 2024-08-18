@@ -1,6 +1,6 @@
 # Dot Diver 🌊🔍
 
-A lightweight, powerful, dependency-free and over engineered TypeScript utility library that provides types and functions to work with object paths in dot notation. Dive into your objects with ease, while maintaining complete type safety! 🎉
+A lightweight, powerful, dependency-free and heavily over engineered TypeScript utility library providing utility types and functions to work with object paths in dot notation.
 
 Dot notation is a popular and convenient way to access deeply nested properties in objects. With Dot Diver, you can safely work with object paths in TypeScript projects, ensuring complete type safety and avoiding runtime errors.
 

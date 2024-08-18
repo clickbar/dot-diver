@@ -10,8 +10,7 @@
 export type IsEqual<A, B> =
   (<G>() => G extends A ? 1 : 2) extends <G>() => G extends B ? 1 : 2 ? true : false
 
-// check if a type is null or undefined
-type IsNullableOrUndefineable<T> = null extends T ? true : undefined extends T ? true : false
+type IsNullableOrUndefinable<T> = null extends T ? true : undefined extends T ? true : false
 
 // Removes all possible index signatures from a type
 type FilterIndexSignatureType<T> = string extends T
@@ -22,12 +21,10 @@ type FilterIndexSignatureType<T> = string extends T
       ? never
       : T
 
-// Remove the index signature from a type
 type RemoveIndexSignature<T> = {
   [K in keyof T as FilterIndexSignatureType<K>]: T[K]
 }
 
-// check if a type has an index signature
 type HasIndexSignature<T> = string extends keyof T
   ? true
   : number extends keyof T
@@ -50,61 +47,50 @@ type RemoveInvalidDotPathKeys<T> = T extends symbol
         : T
       : never
 
-// check if a type is an array
 type IsArray<T> = T extends readonly any[] ? true : false
 
-// check if a array is empty
-type ArrayIsReadonlyArray<T> = T extends any[] ? false : true
+// @see https://github.com/sindresorhus/type-fest/blob/2967fe62b55c7cc13fa003259e119f98edeb9c28/source/internal/array.d.ts#L93
+type ArrayIsReadonlyArray<T> = T extends unknown[] ? false : true
 
-// Get the type of an array element
 type GetArrayElement<T> = T extends readonly (infer U)[] ? U : never
 
 /**
- * check if a type is any
  * @link https://stackoverflow.com/a/49928360/1490091
  */
 type IsAny<T> = 0 extends 1 & T ? true : false
 
-// check if a type is never
 type IsNever<T> = [T] extends [never] ? true : false
 
 /**
- * check if a type is unknown
  * @link https://github.com/sindresorhus/type-fest
  */
 type IsUnknown<T> =
   IsNever<T> extends true ? false : IsAny<T> extends true ? false : unknown extends T ? true : false
 
-// check if a type is a primitive
 type IsPrimitive<T> = T extends string | number | boolean | bigint | symbol | undefined | null
   ? true
   : false
 
-// remove null and undefined from a type
 type ExcludeNullUndefined<T> = Exclude<T, null | undefined>
 
-// check if a type is an empty array
 type IsEmptyArray<T> = T extends readonly [] ? true : false
 
-// check if a type is a tuple
 type IsTuple<T> = T extends readonly [any, ...any[]] ? true : false
 
-// get the length of a tuple
 type TupleLength<T> = T extends { length: infer L } ? (L extends number ? L : never) : never
 
-// get the type of tuple element
 type TupleElement<T, N> = N extends keyof T ? T[N] : never
 
-// remove readonly from members of a record
+// remove readonly modifier from all members of a record
 type Writeable<T> = {
   -readonly [K in keyof T]: T[K]
 }
 
-// remove readonly properties
+// @see https://github.com/sindresorhus/type-fest/blob/2967fe62b55c7cc13fa003259e119f98edeb9c28/source/writable-keys-of.d.ts#L28
 type RemoveReadonlyProperties<T> = {
-  [K in keyof T as IsEqual<{ [k in K]: T[K] }, { readonly [k in K]: T[K] }> extends true
-    ? never
-    : K]: T[K]
+  [K in keyof T as IsEqual<{ [k in K]: T[K] }, { readonly [k in K]: T[K] }> extends false
+    ? K
+    : never]: T[K]
 }
 
 type BeforeLast<T extends string, V extends string | number> = T extends string
@@ -361,7 +347,7 @@ type ValueTraversalStep<T, P, DepthCarry extends unknown[]> =
     ? any
     : IsUnknown<T> extends true
       ? unknown
-      : IsNullableOrUndefineable<T> extends true
+      : IsNullableOrUndefinable<T> extends true
         ? ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
         : IsTuple<T> extends true
           ? P extends `${infer H extends number}.${infer R}`
@@ -392,9 +378,9 @@ type ValueTraversalGate<T, P, DepthCarry extends unknown[]> =
       ? ValueTraversalStep<Writeable<T>, P, MinusOne<DepthCarry>>
       : never
 
-type PathValue<T, P extends string | number, Depth extends number = 40> = P extends ''
+type PathValue<T, P extends string | number> = P extends ''
   ? T
-  : ValueTraversalGate<T, `${P}`, BuildTuple<Depth>>
+  : ValueTraversalGate<T, `${P}`, BuildTuple<40>>
 
 type SafeObject = Record<string, unknown>
 type SearchableObject = object
@@ -432,7 +418,11 @@ function getByPath<T extends SearchableObject, P extends '' | Path<T, P>>(
   const pathArray = path.split('.')
 
   return pathArray.reduce((current: unknown, pathPart) => {
-    if (!isValidObjectAlongPath(current) || !hasOwnProperty.call(current, pathPart)) {
+    if (
+      !isValidObjectAlongPath(current)
+      || (current as SafeObject)[pathPart] === undefined
+      || !hasOwnProperty.call(current, pathPart)
+      ) {
       return undefined
     }
 
@@ -445,7 +435,7 @@ function throwAssignmentError(current: unknown, path: string): never {
   throw new TypeError(`Cannot create property '${path}' on ${type}`)
 }
 
-type SetPathValue<T, P extends string | number, Depth extends number = 40> = PathValue<T, P, Depth>
+type SetPathValue<T, P extends string | number> = PathValue<T, P>
 
 /**
  * Sets a value in an object by dot notation. If an intermediate property is undefined,
@@ -473,14 +463,23 @@ function setByPath<
   const lastKey = pathArray.pop()!
 
   const parentObject = pathArray.reduce<unknown>((current, pathPart) => {
-    if (!isValidObjectAlongPath(current) || !hasOwnProperty.call(current, pathPart)) {
+
+    if (!isValidObjectAlongPath(current)) {
+      throwAssignmentError(current, pathPart)
+    }
+
+    if ((current as SafeObject)[pathPart] === undefined || (current as SafeObject)[pathPart] === null) {
+      return (current as SafeObject)[pathPart] // we return the part here to later throw an error with a better error message
+    }
+
+    if (!hasOwnProperty.call(current, pathPart)) {
       throwAssignmentError(current, pathPart)
     }
 
     return (current as SafeObject)[pathPart]
   }, object)
 
-  if (!isValidObjectAlongPath(parentObject)) {
+  if (parentObject === null || parentObject === undefined) {
     throwAssignmentError(parentObject, lastKey)
   }
 
