@@ -47,6 +47,7 @@
   "devDependencies": {
     "@clickbar/eslint-config-typescript": "^10.2.1",
     "@types/node": "^20.13.0",
+    "@vue/reactivity": "^3.4.38",
     "eslint": "^8.57.0",
     "prettier": "^3.3.0",
     "typescript": "^5.4.5",
