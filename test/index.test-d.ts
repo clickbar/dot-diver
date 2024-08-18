@@ -1,6 +1,6 @@
 import { it, expectTypeOf, test } from 'vitest'
 
-import { type Path, type PathValue } from '../src'
+import type { Path, GetPathValue, SetPathValue } from '../src'
 
 /* -------------------------------------------------------------------------- */
 /*                               Primitive Tests                              */
@@ -380,15 +380,15 @@ it('PathValue returns the correct type', () => {
     neverProp: null as never,
   }
 
-  expectTypeOf<PathValue<typeof test, 'stringProp'>>().toEqualTypeOf<string>()
-  expectTypeOf<PathValue<typeof test, 'numberProp'>>().toEqualTypeOf<number>()
-  expectTypeOf<PathValue<typeof test, 'booleanProp'>>().toEqualTypeOf<boolean>()
-  expectTypeOf<PathValue<typeof test, 'bigintProp'>>().toEqualTypeOf<bigint>()
-  expectTypeOf<PathValue<typeof test, 'symbolProp'>>().toEqualTypeOf<symbol>()
-  expectTypeOf<PathValue<typeof test, 'undefinedProp'>>().toEqualTypeOf<undefined>()
-  expectTypeOf<PathValue<typeof test, 'nullProp'>>().toEqualTypeOf<null>()
-  expectTypeOf<PathValue<typeof test, 'unknownProp'>>().toEqualTypeOf<unknown>()
-  expectTypeOf<PathValue<typeof test, 'neverProp'>>().toEqualTypeOf<never>()
+  expectTypeOf<GetPathValue<typeof test, 'stringProp'>>().toEqualTypeOf<string>()
+  expectTypeOf<GetPathValue<typeof test, 'numberProp'>>().toEqualTypeOf<number>()
+  expectTypeOf<GetPathValue<typeof test, 'booleanProp'>>().toEqualTypeOf<boolean>()
+  expectTypeOf<GetPathValue<typeof test, 'bigintProp'>>().toEqualTypeOf<bigint>()
+  expectTypeOf<GetPathValue<typeof test, 'symbolProp'>>().toEqualTypeOf<symbol>()
+  expectTypeOf<GetPathValue<typeof test, 'undefinedProp'>>().toEqualTypeOf<undefined>()
+  expectTypeOf<GetPathValue<typeof test, 'nullProp'>>().toEqualTypeOf<null>()
+  expectTypeOf<GetPathValue<typeof test, 'unknownProp'>>().toEqualTypeOf<unknown>()
+  expectTypeOf<GetPathValue<typeof test, 'neverProp'>>().toEqualTypeOf<never>()
 })
 
 it('Optional members are return with undefined', () => {
@@ -398,7 +398,7 @@ it('Optional members are return with undefined', () => {
 
   type ExpectedType = string | undefined
 
-  expectTypeOf<PathValue<TestType, 'optionalProp'>>().toEqualTypeOf<ExpectedType>()
+  expectTypeOf<GetPathValue<TestType, 'optionalProp'>>().toEqualTypeOf<ExpectedType>()
 
   interface TestTypeWithOptionalObject {
     optionalProp?: {
@@ -413,10 +413,10 @@ it('Optional members are return with undefined', () => {
     | undefined
 
   expectTypeOf<
-    PathValue<TestTypeWithOptionalObject, 'optionalProp'>
+  GetPathValue<TestTypeWithOptionalObject, 'optionalProp'>
   >().toEqualTypeOf<ExpectedTypeWithOptionalObject>()
   expectTypeOf<
-    PathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>
+  GetPathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>
   >().toEqualTypeOf<ExpectedType>()
 
   interface TestTypeWithOptionalArray {
@@ -426,9 +426,9 @@ it('Optional members are return with undefined', () => {
   type ExpectedTypeWithOptionalArray = string[] | undefined
 
   expectTypeOf<
-    PathValue<TestTypeWithOptionalArray, 'optionalProp'>
+  GetPathValue<TestTypeWithOptionalArray, 'optionalProp'>
   >().toEqualTypeOf<ExpectedTypeWithOptionalArray>()
-  expectTypeOf<PathValue<TestTypeWithOptionalArray, 'optionalProp.0'>>().toEqualTypeOf<
+  expectTypeOf<GetPathValue<TestTypeWithOptionalArray, 'optionalProp.0'>>().toEqualTypeOf<
     string | undefined
   >()
 })
@@ -440,10 +440,10 @@ it('PathValue works with optional (nested) members', () => {
     }
   }
 
-  expectTypeOf<PathValue<TestType, 'optionalProp'>>().toEqualTypeOf<
+  expectTypeOf<GetPathValue<TestType, 'optionalProp'>>().toEqualTypeOf<
     { stringProp: string } | undefined
   >()
-  expectTypeOf<PathValue<TestType, 'optionalProp.stringProp'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'optionalProp.stringProp'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with readonly (nested) members', () => {
@@ -451,21 +451,21 @@ it('PathValue works with readonly (nested) members', () => {
     readonly stringProp: string
   }
 
-  expectTypeOf<PathValue<TestType, 'stringProp'>>().toEqualTypeOf<string>()
+  expectTypeOf<GetPathValue<TestType, 'stringProp'>>().toEqualTypeOf<string>()
 
   interface TestTypeArray {
     readonly array: readonly string[]
   }
 
-  expectTypeOf<PathValue<TestTypeArray, 'array'>>().toEqualTypeOf<readonly string[]>()
-  expectTypeOf<PathValue<TestTypeArray, 'array.0'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestTypeArray, 'array'>>().toEqualTypeOf<readonly string[]>()
+  expectTypeOf<GetPathValue<TestTypeArray, 'array.0'>>().toEqualTypeOf<string | undefined>()
 
   interface TestTypeTuple {
     readonly tuple: readonly ['a', 'b', 'c']
   }
 
-  expectTypeOf<PathValue<TestTypeTuple, 'tuple'>>().toEqualTypeOf<readonly ['a', 'b', 'c']>()
-  expectTypeOf<PathValue<TestTypeTuple, 'tuple.0'>>().toEqualTypeOf<'a'>()
+  expectTypeOf<GetPathValue<TestTypeTuple, 'tuple'>>().toEqualTypeOf<readonly ['a', 'b', 'c']>()
+  expectTypeOf<GetPathValue<TestTypeTuple, 'tuple.0'>>().toEqualTypeOf<'a'>()
 
   interface TestTypeObject {
     readonly object: {
@@ -473,10 +473,10 @@ it('PathValue works with readonly (nested) members', () => {
     }
   }
 
-  expectTypeOf<PathValue<TestTypeObject, 'object'>>().toEqualTypeOf<{
+  expectTypeOf<GetPathValue<TestTypeObject, 'object'>>().toEqualTypeOf<{
     readonly stringProp: string
   }>()
-  expectTypeOf<PathValue<TestTypeObject, 'object.stringProp'>>().toEqualTypeOf<string>()
+  expectTypeOf<GetPathValue<TestTypeObject, 'object.stringProp'>>().toEqualTypeOf<string>()
 })
 
 it('PathValue works with index signatures', () => {
@@ -485,17 +485,17 @@ it('PathValue works with index signatures', () => {
     [index: string]: string
   }
 
-  expectTypeOf<PathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
   // This can also be a number, because TypeScript broadens the typing of index signatures to include number.
   // Because both string and number can be used to access the elements of such an object.
-  expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with index signatures defined via Record<X,Y>', () => {
   type TestType = Record<string, string>
 
-  expectTypeOf<PathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
-  expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, string>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, number>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with nested index signatures', () => {
@@ -510,11 +510,11 @@ it('PathValue works with nested index signatures', () => {
     >
   >
 
-  expectTypeOf<PathValue<TestType, `${string}.${string}`>>().toEqualTypeOf<
+  expectTypeOf<GetPathValue<TestType, `${string}.${string}`>>().toEqualTypeOf<
     { a: string; b: number } | undefined
   >()
-  expectTypeOf<PathValue<TestType, `${string}.${string}.a`>>().toEqualTypeOf<string | undefined>()
-  expectTypeOf<PathValue<TestType, `${string}.${string}.b`>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<GetPathValue<TestType, `${string}.${string}.a`>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, `${string}.${string}.b`>>().toEqualTypeOf<number | undefined>()
 })
 
 it('PathValue works with arrays', () => {
@@ -522,8 +522,8 @@ it('PathValue works with arrays', () => {
     array: string[]
   }
 
-  expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<string[]>()
-  expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'array'>>().toEqualTypeOf<string[]>()
+  expectTypeOf<GetPathValue<TestType, 'array.0'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with objects in arrays', () => {
@@ -531,9 +531,9 @@ it('PathValue works with objects in arrays', () => {
     array: { a: string }[]
   }
 
-  expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string }[]>()
-  expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<{ a: string } | undefined>()
-  expectTypeOf<PathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string }[]>()
+  expectTypeOf<GetPathValue<TestType, 'array.0'>>().toEqualTypeOf<{ a: string } | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with objects in nullable arrays', () => {
@@ -541,16 +541,16 @@ it('PathValue works with objects in nullable arrays', () => {
     array: { a: string; b: number }[] | null
   }
 
-  expectTypeOf<PathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string; b: number }[] | null>()
+  expectTypeOf<GetPathValue<TestType, 'array'>>().toEqualTypeOf<{ a: string; b: number }[] | null>()
 
-  expectTypeOf<PathValue<TestType, 'array.0'>>().toEqualTypeOf<
+  expectTypeOf<GetPathValue<TestType, 'array.0'>>().toEqualTypeOf<
     { a: string; b: number } | undefined
   >()
 
-  expectTypeOf<PathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'array.0.a'>>().toEqualTypeOf<string | undefined>()
 
   // @ts-expect-error - c is not a property of { a: string; b: number }
-  expectTypeOf<PathValue<TestType, 'array.0.c'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'array.0.c'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with unions', () => {
@@ -558,15 +558,15 @@ it('PathValue works with unions', () => {
     union: string | number
   }
 
-  expectTypeOf<PathValue<TestType, 'union'>>().toEqualTypeOf<string | number>()
+  expectTypeOf<GetPathValue<TestType, 'union'>>().toEqualTypeOf<string | number>()
 
   interface TestType2 {
     union: string | { a: string }
   }
 
-  expectTypeOf<PathValue<TestType2, 'union'>>().toEqualTypeOf<string | { a: string }>()
+  expectTypeOf<GetPathValue<TestType2, 'union'>>().toEqualTypeOf<string | { a: string }>()
 
-  expectTypeOf<PathValue<TestType2, 'union.a'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType2, 'union.a'>>().toEqualTypeOf<string | undefined>()
 })
 
 it('PathValue works with tuples', () => {
@@ -574,8 +574,8 @@ it('PathValue works with tuples', () => {
     tuple: ['a', 'b', 'c']
   }
 
-  expectTypeOf<PathValue<TestType, 'tuple'>>().toEqualTypeOf<['a', 'b', 'c']>()
-  expectTypeOf<PathValue<TestType, 'tuple.0'>>().toEqualTypeOf<'a'>()
+  expectTypeOf<GetPathValue<TestType, 'tuple'>>().toEqualTypeOf<['a', 'b', 'c']>()
+  expectTypeOf<GetPathValue<TestType, 'tuple.0'>>().toEqualTypeOf<'a'>()
 })
 
 it('PathValue works with objects in tuples', () => {
@@ -583,23 +583,23 @@ it('PathValue works with objects in tuples', () => {
     tuple: [{ a: string }, 'b']
   }
 
-  expectTypeOf<PathValue<TestType, 'tuple.0'>>().toEqualTypeOf<{ a: string }>()
-  expectTypeOf<PathValue<TestType, 'tuple.0.a'>>().toEqualTypeOf<string>()
+  expectTypeOf<GetPathValue<TestType, 'tuple.0'>>().toEqualTypeOf<{ a: string }>()
+  expectTypeOf<GetPathValue<TestType, 'tuple.0.a'>>().toEqualTypeOf<string>()
 
   // @ts-expect-error - 1 is 'b' not { a: string }
-  expectTypeOf<PathValue<TestType, 'tuple.1.a'>>().toEqualTypeOf<string>()
+  expectTypeOf<GetPathValue<TestType, 'tuple.1.a'>>().toEqualTypeOf<string>()
 })
 
 it('PathValue works with multi-dimensional arrays', () => {
   type TestType = string[][][]
 
-  expectTypeOf<PathValue<TestType, '0.0.0'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, '0.0.0'>>().toEqualTypeOf<string | undefined>()
 
   interface TestType2 {
     array: { a: string }[][]
   }
 
-  expectTypeOf<PathValue<TestType2, 'array.0.0.a'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType2, 'array.0.0.a'>>().toEqualTypeOf<string | undefined>()
 })
 
 /* -------------------------------------------------------------------------- */
@@ -629,19 +629,19 @@ it('Test readme usage example: 🛣️ Path and 🔖 PathValue', () => {
   >()
 
   // Example 2: Using the PathValue type
-  type ValueAtPathA = PathValue<MyObjectType, 'a'> // Output: string
+  type ValueAtPathA = GetPathValue<MyObjectType, 'a'> // Output: string
   expectTypeOf<ValueAtPathA>().toEqualTypeOf<string>()
 
-  type ValueAtPathB_C = PathValue<MyObjectType, 'b.c'> // Output: number
+  type ValueAtPathB_C = GetPathValue<MyObjectType, 'b.c'> // Output: number
   expectTypeOf<ValueAtPathB_C>().toEqualTypeOf<number>()
 
-  type ValueAtPathB_D_E = PathValue<MyObjectType, 'b.d.e'> // Output: boolean
+  type ValueAtPathB_D_E = GetPathValue<MyObjectType, 'b.d.e'> // Output: boolean
   expectTypeOf<ValueAtPathB_D_E>().toEqualTypeOf<boolean>()
 
-  type ValueAtPathF_0 = PathValue<MyObjectType, 'f.0'> // Output: { g: string }
+  type ValueAtPathF_0 = GetPathValue<MyObjectType, 'f.0'> // Output: { g: string }
   expectTypeOf<ValueAtPathF_0>().toEqualTypeOf<{ g: string }>()
 
-  type ValueAtPathF_0_G = PathValue<MyObjectType, 'f.0.g'> // Output: string
+  type ValueAtPathF_0_G = GetPathValue<MyObjectType, 'f.0.g'> // Output: string
   expectTypeOf<ValueAtPathF_0_G>().toEqualTypeOf<string>()
 })
 
@@ -675,10 +675,10 @@ it('Test readme usage example: 🔄 Objects with cyclic dependency', () => {
   >()
 
   // Example 2: Using the PathValue type with a Depth limit
-  type ValueAtPathParent_Id = PathValue<Node, 'parent.id'> // Output: number
+  type ValueAtPathParent_Id = GetPathValue<Node, 'parent.id'> // Output: number
   expectTypeOf<ValueAtPathParent_Id>().toEqualTypeOf<number>()
 
-  type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label'> // Output: string | undefined
+  type ValueAtPathChildren_0_Label = GetPathValue<Node, 'children.0.label'> // Output: string | undefined
   expectTypeOf<ValueAtPathChildren_0_Label>().toEqualTypeOf<string | undefined>()
 })
 
@@ -716,19 +716,19 @@ it('Adds undefined if it is uncertain if the property exists', () => {
     | { e: { f: { g: string } }[] }
     | (() => void)[]
 
-  expectTypeOf<PathValue<TestType, 'a'>>().toEqualTypeOf<string | undefined>()
-  expectTypeOf<PathValue<TestType, 'b'>>().toEqualTypeOf<number | undefined>()
-  expectTypeOf<PathValue<TestType, 'c'>>().toEqualTypeOf<{ d: string } | undefined>()
-  expectTypeOf<PathValue<TestType, 'c.d'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'a'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'b'>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'c'>>().toEqualTypeOf<{ d: string } | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'c.d'>>().toEqualTypeOf<string | undefined>()
 
-  expectTypeOf<PathValue<TestType, 'e'>>().toEqualTypeOf<{ f: { g: string } }[] | undefined>()
-  expectTypeOf<PathValue<TestType, 'e.0'>>().toEqualTypeOf<{ f: { g: string } } | undefined>()
-  expectTypeOf<PathValue<TestType, 'e.0.f'>>().toEqualTypeOf<{ g: string } | undefined>()
-  expectTypeOf<PathValue<TestType, 'e.0.f.g'>>().toEqualTypeOf<string | undefined>()
-  expectTypeOf<PathValue<TestType, 'e.1.f.g'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'e'>>().toEqualTypeOf<{ f: { g: string } }[] | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'e.0'>>().toEqualTypeOf<{ f: { g: string } } | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'e.0.f'>>().toEqualTypeOf<{ g: string } | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'e.0.f.g'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'e.1.f.g'>>().toEqualTypeOf<string | undefined>()
 
-  expectTypeOf<PathValue<TestType, number>>().toEqualTypeOf<number | (() => void) | undefined>()
-  expectTypeOf<PathValue<TestType, `${number}`>>().toEqualTypeOf<
+  expectTypeOf<GetPathValue<TestType, number>>().toEqualTypeOf<number | (() => void) | undefined>()
+  expectTypeOf<GetPathValue<TestType, `${number}`>>().toEqualTypeOf<
     number | (() => void) | undefined
   >()
 })
@@ -738,13 +738,13 @@ it('Does not need to add undefined if it is certain that the property exists', (
 
   type ExpectedValue = string | number | { b: string } | { b: string }[]
 
-  expectTypeOf<PathValue<TestType, 'a'>>().toEqualTypeOf<ExpectedValue>()
+  expectTypeOf<GetPathValue<TestType, 'a'>>().toEqualTypeOf<ExpectedValue>()
 
   type TestType2 = TestType | { a?: boolean }
 
   type ExpectedValue2 = ExpectedValue | boolean | undefined
 
-  expectTypeOf<PathValue<TestType2, 'a'>>().toEqualTypeOf<ExpectedValue2>()
+  expectTypeOf<GetPathValue<TestType2, 'a'>>().toEqualTypeOf<ExpectedValue2>()
 })
 
 /**
@@ -842,24 +842,24 @@ test('PathValue properly handles union types', () => {
     l: string | string[]
   }
 
-  expectTypeOf<PathValue<TestObject, 'a'>>().toEqualTypeOf<string | { b: number }>()
-  expectTypeOf<PathValue<TestObject, 'a.b'>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<GetPathValue<TestObject, 'a'>>().toEqualTypeOf<string | { b: number }>()
+  expectTypeOf<GetPathValue<TestObject, 'a.b'>>().toEqualTypeOf<number | undefined>()
 
-  expectTypeOf<PathValue<TestObject, 'c.d'>>().toEqualTypeOf<string | { e: boolean }>()
-  expectTypeOf<PathValue<TestObject, 'c.d.e'>>().toEqualTypeOf<boolean | undefined>()
+  expectTypeOf<GetPathValue<TestObject, 'c.d'>>().toEqualTypeOf<string | { e: boolean }>()
+  expectTypeOf<GetPathValue<TestObject, 'c.d.e'>>().toEqualTypeOf<boolean | undefined>()
 
-  expectTypeOf<PathValue<TestObject, 'f.0'>>().toEqualTypeOf<
+  expectTypeOf<GetPathValue<TestObject, 'f.0'>>().toEqualTypeOf<
     { g: string; h: number } | { g: number; h: number; i: boolean }
   >()
-  expectTypeOf<PathValue<TestObject, 'f.0.g'>>().toEqualTypeOf<string | number>()
-  expectTypeOf<PathValue<TestObject, 'f.0.h'>>().toEqualTypeOf<number>()
-  expectTypeOf<PathValue<TestObject, 'f.0.i'>>().toEqualTypeOf<boolean | undefined>()
+  expectTypeOf<GetPathValue<TestObject, 'f.0.g'>>().toEqualTypeOf<string | number>()
+  expectTypeOf<GetPathValue<TestObject, 'f.0.h'>>().toEqualTypeOf<number>()
+  expectTypeOf<GetPathValue<TestObject, 'f.0.i'>>().toEqualTypeOf<boolean | undefined>()
 
-  expectTypeOf<PathValue<TestObject, 'j'>>().toEqualTypeOf<{ k: string }[] | number>()
-  expectTypeOf<PathValue<TestObject, 'j.0.k'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestObject, 'j'>>().toEqualTypeOf<{ k: string }[] | number>()
+  expectTypeOf<GetPathValue<TestObject, 'j.0.k'>>().toEqualTypeOf<string | undefined>()
 
-  expectTypeOf<PathValue<TestObject, 'l'>>().toEqualTypeOf<string | string[]>()
-  expectTypeOf<PathValue<TestObject, 'l.0'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestObject, 'l'>>().toEqualTypeOf<string | string[]>()
+  expectTypeOf<GetPathValue<TestObject, 'l.0'>>().toEqualTypeOf<string | undefined>()
 })
 
 /**
@@ -921,7 +921,7 @@ it('Returns correct paths after offset', () => {
 it('Returns the object itself if the path is empty', () => {
   type TestType = { a: string }
 
-  expectTypeOf<PathValue<TestType, ''>>().toEqualTypeOf<TestType>()
+  expectTypeOf<GetPathValue<TestType, ''>>().toEqualTypeOf<TestType>()
 })
 
 
@@ -935,6 +935,60 @@ test('PathValue returns unknown if we exceed its depth limit', () => {
     a: TestA
   }
 
-  expectTypeOf<PathValue<TestA, 'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a'>>().toEqualTypeOf<TestA>()
-  expectTypeOf<PathValue<TestA, 'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b'>>().toBeUnknown()
+  expectTypeOf<GetPathValue<TestA, 'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a'>>().toEqualTypeOf<TestA>()
+  expectTypeOf<GetPathValue<TestA, 'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b'>>().toBeUnknown()
+})
+
+test('SetPathValue vs GetPathValue', () => {
+  // test noUncheckedUnionAccess
+  type TypeWithUnion = {
+    a: number | { nested: string }
+    b: number | { nested: string | undefined }
+  }
+
+  expectTypeOf<GetPathValue<TypeWithUnion, 'a.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithUnion, 'a.nested'>>().toEqualTypeOf<string>()
+
+  expectTypeOf<GetPathValue<TypeWithUnion, 'b.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithUnion, 'b.nested'>>().toEqualTypeOf<string | undefined>()
+
+  // test noUncheckedOptionalAccess
+  type TypeWithOptionalProperties = {
+    a?: number
+    b?: { nested: string }
+    c?: { nested: string | undefined }
+  }
+
+  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'a'>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'a'>>().toEqualTypeOf<number | undefined>()
+
+  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'b.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'b.nested'>>().toEqualTypeOf<string>()
+
+  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'c.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'c.nested'>>().toEqualTypeOf<string | undefined>()
+
+  // test noUncheckedIndexAccess
+  type TypeWithArray = {
+    a: number[]
+    b: { nested: string }[]
+    c: { nested: string | undefined }
+    d: Record<string, string>
+    e: Record<string, string | undefined>
+  }
+
+  expectTypeOf<GetPathValue<TypeWithArray, 'a.0'>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<SetPathValue<TypeWithArray, 'a.0'>>().toEqualTypeOf<number>()
+
+  expectTypeOf<GetPathValue<TypeWithArray, 'b.0.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithArray, 'b.0.nested'>>().toEqualTypeOf<string>()
+
+  expectTypeOf<GetPathValue<TypeWithArray, 'c.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithArray, 'c.nested'>>().toEqualTypeOf<string | undefined>()
+
+  expectTypeOf<GetPathValue<TypeWithArray, 'd.key'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithArray, 'd.key'>>().toEqualTypeOf<string>()
+
+  expectTypeOf<GetPathValue<TypeWithArray, 'e.key'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<SetPathValue<TypeWithArray, 'e.key'>>().toEqualTypeOf<string | undefined>()
 })

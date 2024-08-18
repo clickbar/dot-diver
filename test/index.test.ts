@@ -3,7 +3,7 @@ import { expect, it, test } from 'vitest'
 
 import { getByPath, setByPath } from '../src'
 
-import type { Path, PathValue, SetPathValue, SearchableObject } from '../src'
+import type { Path, SearchableObject, SetPathValue } from '../src'
 
 
 it('can get simple member', () => {
@@ -145,8 +145,8 @@ it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { depth: 5 }> & string>(
     object: T,
     path: P,
-  ): PathValue<T, P> {
-    return getByPath(object, path) as PathValue<T, P>
+  ): SetPathValue<T, P> {
+    return getByPath(object, path) as SetPathValue<T, P>
   }
 
   // eslint-disable-next-line unicorn/consistent-function-scoping

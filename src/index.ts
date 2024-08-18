@@ -288,7 +288,7 @@ type PathWithOffset<T, Config extends BasePathConfig, Offset extends string | nu
       : Offset extends `${string}.${string}`
         ? BeforeLast<Offset, '.'> extends infer H
           ? H extends string | number
-            ? PathValue<T, H> extends infer V
+            ? PathValue<T, H, GetByPathValuePathConfig> extends infer V
               ? IsNever<V> extends true
                 ? SimplePath<T, Config>
                 : `${H}.${SimplePath<V, Config>}`
@@ -342,45 +342,73 @@ type Path<
 /*                                 Path Value                                 */
 /* -------------------------------------------------------------------------- */
 
-type ValueTraversalStep<T, P, DepthCarry extends unknown[]> =
+/**
+ * ValuePathConfig is a configuration object that can be used to configure the behavior of the path function.
+ *
+ * @property onlyWriteable - If true, only writeable properties are returned
+ * @property depth - The maximum depth the path function should traverse
+ */
+interface ValueBasePathConfig {
+  noUncheckedUnionAccess: boolean // if true, return undefined if accessing a nested property of a union, which is not present in all union members
+  noUncheckedIndexAccess: boolean // if true, return undefined if accessing an array element
+  noUncheckedOptionalAccess: boolean // if true, return undefined if accessing a property on an optional or nullable object
+}
+
+// Default configuration
+interface GetByPathValuePathConfig extends BasePathConfig {
+  noUncheckedUnionAccess: true
+  noUncheckedIndexAccess: true
+  noUncheckedOptionalAccess: true
+}
+
+interface SetByPathValuePathConfig extends BasePathConfig {
+  noUncheckedUnionAccess: false
+  noUncheckedIndexAccess: false
+  noUncheckedOptionalAccess: false
+}
+
+type ValueTraversalStep<T, P, DepthCarry extends unknown[], Config extends ValueBasePathConfig> =
   IsAny<T> extends true
     ? any
     : IsUnknown<T> extends true
       ? unknown
       : IsNullableOrUndefinable<T> extends true
-        ? ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry> | undefined
+        ? ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry, Config> | Config['noUncheckedOptionalAccess'] extends true ? undefined : never
         : IsTuple<T> extends true
           ? P extends `${infer H extends number}.${infer R}`
-            ? ValueTraversalGate<TupleElement<T, H>, R, DepthCarry>
+            ? ValueTraversalGate<TupleElement<T, H>, R, DepthCarry, Config>
             : P extends `${infer K extends number}`
               ? TupleElement<T, K>
-              : undefined
+              : Config['noUncheckedUnionAccess'] extends true ? undefined : never
           : IsArray<T> extends true
             ? P extends `${infer _H extends number}.${infer R}`
-              ? ValueTraversalGate<GetArrayElement<T>, R, DepthCarry> | undefined
+              ? ValueTraversalGate<GetArrayElement<T>, R, DepthCarry, Config> | (Config['noUncheckedIndexAccess'] extends true ? undefined : never)
               : P extends `${infer _K extends number}`
-                ? GetArrayElement<T> | undefined
-                : undefined
+                ? GetArrayElement<T> | (Config['noUncheckedIndexAccess'] extends true ? undefined : never)
+                : Config['noUncheckedUnionAccess'] extends true ? undefined : never
             : P extends `${infer H}.${infer R}`
               ? H extends keyof T
                 ?
-                    | ValueTraversalGate<T[H], R, DepthCarry>
-                    | (HasIndexSignature<T> extends true ? undefined : never)
-                : undefined
+                    | ValueTraversalGate<T[H], R, DepthCarry, Config>
+                    | (HasIndexSignature<T> extends true ? (Config['noUncheckedIndexAccess'] extends true ? undefined : never) : never)
+                : Config['noUncheckedUnionAccess'] extends true ? undefined : never
               : P extends keyof T
-                ? T[P] | (HasIndexSignature<T> extends true ? undefined : never)
-                : undefined
+                ? T[P] | (HasIndexSignature<T> extends true ? (Config['noUncheckedIndexAccess'] extends true ? undefined : never) : never)
+                : Config['noUncheckedUnionAccess'] extends true ? undefined : never
 
-type ValueTraversalGate<T, P, DepthCarry extends unknown[]> =
+type ValueTraversalGate<T, P, DepthCarry extends unknown[], Config extends ValueBasePathConfig> =
   TupleLength<DepthCarry> extends 0
     ? unknown
     : T extends T
-      ? ValueTraversalStep<Writeable<T>, P, MinusOne<DepthCarry>>
+      ? ValueTraversalStep<Writeable<T>, P, MinusOne<DepthCarry>, Config>
       : never
 
-type PathValue<T, P extends string | number> = P extends ''
+type PathValue<T, P extends string | number, Config extends ValueBasePathConfig> = P extends ''
   ? T
-  : ValueTraversalGate<T, `${P}`, BuildTuple<40>>
+  : ValueTraversalGate<T, `${P}`, BuildTuple<40>, Config>
+
+type GetPathValue<T, P extends string | number> = PathValue<T, P, GetByPathValuePathConfig>
+type SetPathValue<T, P extends string | number> = PathValue<T, P, SetByPathValuePathConfig>
 
 type SafeObject = Record<string, unknown>
 type SearchableObject = object
@@ -410,9 +438,9 @@ function isValidObjectAlongPath(current: unknown): boolean {
 function getByPath<T extends SearchableObject, P extends '' | Path<T, P>>(
   object: T,
   path: P & string, // required so type gets narrowed down from its union of possible paths to its actual value. TODO: Find Ts-Issue or similar why this is required.
-): PathValue<T, P> {
+): GetPathValue<T, P> {
   if (path === '') {
-    return object as PathValue<T, P>
+    return object as GetPathValue<T, P>
   }
 
   const pathArray = path.split('.')
@@ -427,15 +455,13 @@ function getByPath<T extends SearchableObject, P extends '' | Path<T, P>>(
     }
 
     return (current as SafeObject)[pathPart]
-  }, object) as PathValue<T, P>
+  }, object) as GetPathValue<T, P>
 }
 
 function throwAssignmentError(current: unknown, path: string): never {
   const type = current === null ? 'null' : typeof current
   throw new TypeError(`Cannot create property '${path}' on ${type}`)
 }
-
-type SetPathValue<T, P extends string | number> = PathValue<T, P>
 
 /**
  * Sets a value in an object by dot notation. If an intermediate property is undefined,
@@ -486,6 +512,6 @@ function setByPath<
   ;(parentObject as SafeObject)[lastKey] = value
 }
 
-export type { Path, PathValue, SetPathValue, SearchableObject }
+export type { Path, PathValue, GetPathValue, SetPathValue, SearchableObject }
 
 export { getByPath, setByPath }

@@ -112,12 +112,12 @@ console.log(object.f[1].g) // Output: 'new array-item-2'
 <br>
 <br>
 
-### 🛣️ Path and 🔖 PathValue
+### 🛣️ Path and 🔖 GetPathValue
 
 <br>
 
 ```typescript
-import type { Path, PathValue } from '@clickbar/dot-diver'
+import type { Path, GetPathValue } from '@clickbar/dot-diver'
 
 // Define a sample object type with nested properties
 type MyObjectType = {
@@ -137,12 +137,12 @@ type MyObjectPaths = Path<MyObjectType>
 // MyObjectPaths will be a union type representing all valid paths in dot notation:
 // 'a' | 'b' | 'f' | 'b.c' | 'b.d' | 'b.d.e' | 'f.0' | 'f.1' | 'f.0.g' | 'f.1.g'
 
-// Example 2: Using the PathValue type
-type ValueAtPathA = PathValue<MyObjectType, 'a'> // Output: string
-type ValueAtPathB_C = PathValue<MyObjectType, 'b.c'> // Output: number
-type ValueAtPathB_D_E = PathValue<MyObjectType, 'b.d.e'> // Output: boolean
-type ValueAtPathF_0 = PathValue<MyObjectType, 'f.0'> // Output: { g: string }
-type ValueAtPathF_0_G = PathValue<MyObjectType, 'f.0.g'> // Output: string
+// Example 2: Using the GetPathValue type
+type ValueAtPathA = GetPathValue<MyObjectType, 'a'> // Output: string
+type ValueAtPathB_C = GetPathValue<MyObjectType, 'b.c'> // Output: number
+type ValueAtPathB_D_E = GetPathValue<MyObjectType, 'b.d.e'> // Output: boolean
+type ValueAtPathF_0 = GetPathValue<MyObjectType, 'f.0'> // Output: { g: string }
+type ValueAtPathF_0_G = GetPathValue<MyObjectType, 'f.0.g'> // Output: string
 ```
 
 <br>
@@ -153,7 +153,7 @@ type ValueAtPathF_0_G = PathValue<MyObjectType, 'f.0.g'> // Output: string
 <br>
 
 ```typescript
-import type { Path, PathValue } from '@clickbar/dot-diver'
+import type { Path, GetPathValue } from '@clickbar/dot-diver'
 
 // Define an object type with nested properties and a cyclic dependency
 type Node = {
@@ -169,10 +169,10 @@ type NodePathsDepth2 = Path<Node, 2> // Depth limit of 2
 // NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 3:
 // 'id' | 'label' | 'parent' | 'children' | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.${any}` | `parent.children.${any}` | `children.${number}` | `children.${number}.${any}`
 
-// Example 2: Using the PathValue type with a Depth limit
-type ValueAtPathParent_Id = PathValue<Node, 'parent.id', 3> // Output: number
-type ValueAtPathChildren_0_Label = PathValue<Node, 'children.0.label', 3> // Output: string | undefined
-type ValueAtPathParent_Parent_Parent = PathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
+// Example 2: Using the GetPathValue type with a Depth limit
+type ValueAtPathParent_Id = GetPathValue<Node, 'parent.id', 3> // Output: number
+type ValueAtPathChildren_0_Label = GetPathValue<Node, 'children.0.label', 3> // Output: string | undefined
+type ValueAtPathParent_Parent_Parent = GetPathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
 ```
 
 The default depth is currently **3**.\
@@ -192,13 +192,13 @@ Example:
 ```typescript
 import { getByPath, setByPath } from '@clickbar/dot-diver'
 
-import type { Path, SearchableObject, PathValue } from '@clickbar/dot-diver'
+import type { Path, SearchableObject, GetPathValue, SetPathValue } from '@clickbar/dot-diver'
 
 function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { depth: 5 }> & string>(
   object: T,
   path: P,
-): PathValue<T, P> {
-  return getByPath(object, path) as PathValue<T, P>
+): GetPathValue<T, P> {
+  return getByPath(object, path) as GetPathValue<T, P>
 }
 
 function setByPathDepth5<
