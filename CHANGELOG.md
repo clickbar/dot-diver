@@ -2,12 +2,12 @@
 
 All notable changes to **dot-diver** will be documented here. Inspired by [keep a changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [2.0.0](https://github.com/clickbar/dot-diver/tree/2.0.0) (2024-03-25)
+## [2.0.0](https://github.com/clickbar/dot-diver/tree/2.0.0) (2024-08-18)
 
-## features
+## Features
 
-Support Paths up to a depth of 40 (limited by TypeScript's recursion depth) by cyclic constraints to only lookup up
-the next 3 (default) levels. The limit of 40 comes by accessing the value at this depth level. This should
+Support paths up to a depth of 40 (limited by TypeScript's recursion depth) by utilizing cyclic constraints to only lookup up
+the next 3 (default) levels. This should
 heavily improve performance and reduce the amount of generated types.
 
 ## Fixes
@@ -21,13 +21,13 @@ heavily improve performance and reduce the amount of generated types.
 
 ### Breaking Changes
 
-In general the `depth` limit of Path is no long the max depth, but instead a 'lookahead' depth. E.g. if you have a depth limit of 3,
+In general the `depth` limit of `Path` is no longer the max depth, but instead a 'lookahead' depth. E.g. if you have a depth limit of 3,
 and are currently (while typing) at a depth of 2, the paths for the next 3 levels will be shown in autocompletion. You can no longer
-constraint the max depth of the path, but only the lookahead depth. If this is a problem for you, please open a issue.
+constrain the max depth of the path, but only the lookahead depth. If this is a problem for you, please open an issue.
 
 #### Value of Array Member, Optional Properties and Union Types
 
-In 1.0.0 you got the full type of nested unions.
+In 1.0.0 you received the full type for nested unions.
 
 ```typescript
 type A = { a: number | { nested: string } }
@@ -35,14 +35,14 @@ type A = { a: number | { nested: string } }
 type NestedType = PathValue<A, 'a.nested'> // string
 ```
 
-This is incorrect behavior, as `a` could be a number and not an object with a `nested` property. This is now fixed.
+This is incorrect behavior, because `a` could also be a number and not an object with a `nested` property. This is now fixed.
 
-```PathValue``` got now splitted into two different types:
+```PathValue``` was split into two different types:
 
 - ```GetPathValue``` for reading values
 - ```SetPathValue``` for setting values
 
-these behave different when accessing values in a object.
+the resulting types differ when accessing values in an object or setting them.
 
 ```typescript
 type A = {
@@ -63,12 +63,12 @@ type NestedType7 = SetPathValue<A, 'c.5', string> // string
 type NestedType8 = SetPathValue<A, 'd.nested', string> // string
 ```
 
-These type are used by there respective functions `getByPath` and `setByPath` and should more accurately represent the types of accessed values but can break old code.
+These type are used by their respective functions `getByPath` and `setByPath` and should more accurately represent the types of accessed values but can potentially break old code.
 
 #### Custom Implementation
 
 Implementation of custom `getByPath` and `setByPath` functions need to be updated for the new types.
-If you implemented them to change the depth limit you might not need them anymore, as the (max) depth is now 40. (limited by access to the path value at that depth)
+If you implemented them to change the depth limit you might not need them anymore, as the (max) depth is now 40 (limited by TypeScript's recursion limit).
 You still want to keep them, if you want to change the shown paths in autocompletion or have other use cases.
 You only need to change the typing.
 
