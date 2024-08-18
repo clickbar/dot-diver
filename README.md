@@ -109,6 +109,9 @@ setByPath(object, 'f.1.g', 'new array-item-2')
 console.log(object.f[1].g) // Output: 'new array-item-2'
 ```
 
+> [!NOTE]
+> At the moment, we can not support object properties having a '.' in their name, since this would conflict with the dot notation traversal.
+
 <br>
 <br>
 
@@ -163,29 +166,35 @@ type Node = {
   children: Node[]
 }
 
-// Example 1: Using the Path type with a Depth limit
-type NodePathsDepth2 = Path<Node, 2> // Depth limit of 2
+// Example 1: Using the Path type with the default depth limit
+type NodePathsDepth2 = Path<Node> // Depth limit of 2
 
-// NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 3:
+// NodePathsDepth2 will be a union type representing all valid paths in dot notation up to a depth of 2:
 // 'id' | 'label' | 'parent' | 'children' | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.${any}` | `parent.children.${any}` | `children.${number}` | `children.${number}.${any}`
 
-// Example 2: Using the GetPathValue type with a Depth limit
-type ValueAtPathParent_Id = GetPathValue<Node, 'parent.id', 3> // Output: number
-type ValueAtPathChildren_0_Label = GetPathValue<Node, 'children.0.label', 3> // Output: string | undefined
-type ValueAtPathParent_Parent_Parent = GetPathValue<Node, 'parent.parent.parent.parent', 3> // Output: unknown (due to the depth limit)
+// Example 2: Using the Path type with a custom depth limit
+type NodePathsDepth3 = Path<Node, never, { depth: 3, onlyWritable: false }> // Depth limit of 3
+
+// With a depth limit of 3, NodePathsDepth3 will be a union type representing all valid paths in dot notation up to a depth of 3:
+// 'id' | 'label' | 'parent' | 'children'
+// | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.parent'
+// | `parent.parent.parent' | 'parent.parent.children' | ... etc.
 ```
 
-The default depth is currently **3**.\
-At the moment, it is not possible to customize it when using the provided `getByPath` and `setByPath` functions.
-This is further explained in this [issue](https://github.com/clickbar/dot-diver/issues/1).
+The second parameter is an `offset`. You can provide a valid path to start the autocompletion from there.\
+This is used in `getByPath` and `setByPath` to provide autocompletion for the next levels, starting from the current path.
+When using `getByPath` and `setByPath`, the `Depth` parameter is the lookahead depth and not the max depth.
+
+The default depth is currently **3**.
 
 <br>
 <br>
 
-### ⚙️ Customizing the Depth Limit
+### ⚙️ Customizing the Depth Lookahead Limit
 
-You can still customize it, by implementing your own functions, which just calls ours.
-Example:
+You can customize the set and get functions, by implementing your own variant and using the provided types.\
+
+Here is an example where we customize the lookahead depth to 5:
 
 <br>
 
@@ -246,21 +255,21 @@ type TestType = {
 }
 ```
 
-You will get auto completion again, as soon as you typed the path to the nested object, e.g. `b.`.
+You will get autocompletion again, as soon as you typed the path to the nested object, e.g. `b.`.
 
 <br>
 
 ### ❗ Why are my paths truncated inside an array?
 
-Your paths are not truncated. Typescript will still validate them.
+Your paths are not truncated. TypeScript will still validate them.
 Some IDEs have problems with displaying `children.${number}` paths.
-If you can, define the array as an tuple. This will include all paths in the auto completion.
+If you can, define the array as an tuple. This will include all paths in the autocompletion.
 
 <br>
 
 ### ❗ I get the error "Type instantiation is excessively deep and possibly infinite.ts(2589)"
 
-This happens if typescript reaches its maximum depth limit. This library should prevent this, but it can still happen if a object has a lot of cyclic dependencies.\
+This happens if TypeScript reaches its maximum depth limit. This library should prevent this, but it can still happen if a object has a lot of cyclic dependencies.\
 For example:
 
 ```typescript
@@ -275,8 +284,8 @@ type TestType = {
 }
 ```
 
-You can try to decrease the depth limit of the auto completion by reimplementing the `getByPath` and `setByPath` functions.
-See [this section](#%EF%B8%8F-customizing-the-depth-limit) for customizing the depth limit.
+You can try to decrease the lookahead depth of the autocompletion by reimplementing the `getByPath` and `setByPath` functions.
+See [this section](#%EF%B8%8F-customizing-the-depth-lookahead-limit).
 
 <br>
 
