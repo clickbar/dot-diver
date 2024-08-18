@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* -------------------------------------------------------------------------- */
 /*                                Utility Types                               */
 /* -------------------------------------------------------------------------- */
@@ -8,6 +9,7 @@
  * @see https://github.com/sindresorhus/type-fest/blob/fa1c3f3cf49c4d5aae9da47c04320d1934cb2f9b/source/is-equal.d.ts#L29
  */
 export type IsEqual<A, B> =
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   (<G>() => G extends A ? 1 : 2) extends <G>() => G extends B ? 1 : 2 ? true : false
 
 type IsNullableOrUndefinable<T> = null extends T ? true : undefined extends T ? true : false
@@ -377,28 +379,54 @@ type ValueTraversalStep<T, P, DepthCarry extends unknown[], Config extends Value
     : IsUnknown<T> extends true
       ? unknown
       : IsNullableOrUndefinable<T> extends true
-        ? ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry, Config> | Config['noUncheckedOptionalAccess'] extends true ? undefined : never
+        ?
+            | ValueTraversalGate<ExcludeNullUndefined<T>, P, DepthCarry, Config>
+            | Config['noUncheckedOptionalAccess'] extends true
+          ? undefined
+          : never
         : IsTuple<T> extends true
           ? P extends `${infer H extends number}.${infer R}`
             ? ValueTraversalGate<TupleElement<T, H>, R, DepthCarry, Config>
             : P extends `${infer K extends number}`
               ? TupleElement<T, K>
-              : Config['noUncheckedUnionAccess'] extends true ? undefined : never
+              : Config['noUncheckedUnionAccess'] extends true
+                ? undefined
+                : never
           : IsArray<T> extends true
             ? P extends `${infer _H extends number}.${infer R}`
-              ? ValueTraversalGate<GetArrayElement<T>, R, DepthCarry, Config> | (Config['noUncheckedIndexAccess'] extends true ? undefined : never)
+              ?
+                  | ValueTraversalGate<GetArrayElement<T>, R, DepthCarry, Config>
+                  | (Config['noUncheckedIndexAccess'] extends true ? undefined : never)
               : P extends `${infer _K extends number}`
-                ? GetArrayElement<T> | (Config['noUncheckedIndexAccess'] extends true ? undefined : never)
-                : Config['noUncheckedUnionAccess'] extends true ? undefined : never
+                ?
+                    | GetArrayElement<T>
+                    | (Config['noUncheckedIndexAccess'] extends true ? undefined : never)
+                : Config['noUncheckedUnionAccess'] extends true
+                  ? undefined
+                  : never
             : P extends `${infer H}.${infer R}`
               ? H extends keyof T
                 ?
                     | ValueTraversalGate<T[H], R, DepthCarry, Config>
-                    | (HasIndexSignature<T> extends true ? (Config['noUncheckedIndexAccess'] extends true ? undefined : never) : never)
-                : Config['noUncheckedUnionAccess'] extends true ? undefined : never
+                    | (HasIndexSignature<T> extends true
+                        ? Config['noUncheckedIndexAccess'] extends true
+                          ? undefined
+                          : never
+                        : never)
+                : Config['noUncheckedUnionAccess'] extends true
+                  ? undefined
+                  : never
               : P extends keyof T
-                ? T[P] | (HasIndexSignature<T> extends true ? (Config['noUncheckedIndexAccess'] extends true ? undefined : never) : never)
-                : Config['noUncheckedUnionAccess'] extends true ? undefined : never
+                ?
+                    | T[P]
+                    | (HasIndexSignature<T> extends true
+                        ? Config['noUncheckedIndexAccess'] extends true
+                          ? undefined
+                          : never
+                        : never)
+                : Config['noUncheckedUnionAccess'] extends true
+                  ? undefined
+                  : never
 
 type ValueTraversalGate<T, P, DepthCarry extends unknown[], Config extends ValueBasePathConfig> =
   TupleLength<DepthCarry> extends 0
@@ -449,12 +477,13 @@ function getByPath<T extends SearchableObject, P extends '' | Path<T, P>>(
 
   const pathArray = path.split('.')
 
+  // eslint-disable-next-line unicorn/no-array-reduce
   return pathArray.reduce((current: unknown, pathPart) => {
     if (
-      !isValidObjectAlongPath(current)
-      || (current as SafeObject)[pathPart] === undefined
-      || !hasOwnProperty.call(current, pathPart)
-      ) {
+      !isValidObjectAlongPath(current) ||
+      (current as SafeObject)[pathPart] === undefined ||
+      !hasOwnProperty.call(current, pathPart)
+    ) {
       return undefined
     }
 
@@ -482,23 +511,26 @@ function throwAssignmentError(current: unknown, path: string): never {
  * Without the intersection, the path would just be of type Path<T, P> and PathValue would be a union of all possible return types.
  * By using the intersection, TypeScript is forced to apply the Path constraints and infer the type from the provided user input.
  */
-function setByPath<
-  T extends SearchableObject,
-  P extends Path<T, P, SetByPathConfig>,
-  V extends SetPathValue<T, P>,
->(object: T, path: P & string, value: V): void {
+function setByPath<T extends SearchableObject, P extends Path<T, P, SetByPathConfig>>(
+  object: T,
+  path: P & string,
+  value: SetPathValue<T, P>,
+): void {
   const pathArray = path.split('.')
   // pathArray will never be empty
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const lastKey = pathArray.pop()!
 
+  // eslint-disable-next-line unicorn/no-array-reduce
   const parentObject = pathArray.reduce<unknown>((current, pathPart) => {
-
     if (!isValidObjectAlongPath(current)) {
       throwAssignmentError(current, pathPart)
     }
 
-    if ((current as SafeObject)[pathPart] === undefined || (current as SafeObject)[pathPart] === null) {
+    if (
+      (current as SafeObject)[pathPart] === undefined ||
+      (current as SafeObject)[pathPart] === null
+    ) {
       return (current as SafeObject)[pathPart] // we return the part here to later throw an error with a better error message
     }
 

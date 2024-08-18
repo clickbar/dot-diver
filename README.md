@@ -173,7 +173,7 @@ type NodePathsDepth2 = Path<Node> // Depth limit of 2
 // 'id' | 'label' | 'parent' | 'children' | 'parent.id' | 'parent.label' | 'parent.parent' | 'parent.children' | `parent.parent.${any}` | `parent.children.${any}` | `children.${number}` | `children.${number}.${any}`
 
 // Example 2: Using the Path type with a custom depth limit
-type NodePathsDepth3 = Path<Node, never, { depth: 3, onlyWritable: false }> // Depth limit of 3
+type NodePathsDepth3 = Path<Node, never, { depth: 3; onlyWritable: false }> // Depth limit of 3
 
 // With a depth limit of 3, NodePathsDepth3 will be a union type representing all valid paths in dot notation up to a depth of 3:
 // 'id' | 'label' | 'parent' | 'children'
@@ -213,8 +213,7 @@ function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { dept
 function setByPathDepth5<
   T extends SearchableObject,
   P extends Path<T, P, { onlyWriteable: true; depth: 5 }> & string,
-  V extends SetPathValue<T, P>,
->(object: T, path: P, value: V): void {
+>(object: T, path: P, value: SetPathValue<T, P>): void {
   setByPath(object, path, value as SetPathValue<T, P>)
 }
 

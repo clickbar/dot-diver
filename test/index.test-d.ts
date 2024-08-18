@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { it, expectTypeOf, test } from 'vitest'
 
-import type { Path, GetPathValue, SetPathValue } from '../src'
+import { type Path, type GetPathValue, type SetPathValue } from '../src'
 
 /* -------------------------------------------------------------------------- */
 /*                               Primitive Tests                              */
@@ -19,6 +21,7 @@ it('Path type throws never for other types', () => {
 })
 
 it('Path type returns primitive members on first level', () => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const test = {
     stringProp: 'a',
     numberProp: 1,
@@ -50,6 +53,7 @@ it('Path type returns primitive members on first level', () => {
 /* -------------------------------------------------------------------------- */
 
 it('Symbols are not allowed members', () => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const test = {
     [Symbol()]: 'a',
   }
@@ -72,6 +76,7 @@ it('Arrays can be accessed with number', () => {
 
   expectTypeOf<Path<typeof test>>().toEqualTypeOf<number | `${number}`>()
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const testObject = {
     array: test,
   }
@@ -368,6 +373,7 @@ it('Cyclic dependencies are handled correctly', () => {
 /* -------------------------------------------------------------------------- */
 
 it('PathValue returns the correct type', () => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   const test = {
     stringProp: 'a',
     numberProp: 1,
@@ -413,10 +419,10 @@ it('Optional members are return with undefined', () => {
     | undefined
 
   expectTypeOf<
-  GetPathValue<TestTypeWithOptionalObject, 'optionalProp'>
+    GetPathValue<TestTypeWithOptionalObject, 'optionalProp'>
   >().toEqualTypeOf<ExpectedTypeWithOptionalObject>()
   expectTypeOf<
-  GetPathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>
+    GetPathValue<TestTypeWithOptionalObject, 'optionalProp.stringProp'>
   >().toEqualTypeOf<ExpectedType>()
 
   interface TestTypeWithOptionalArray {
@@ -426,7 +432,7 @@ it('Optional members are return with undefined', () => {
   type ExpectedTypeWithOptionalArray = string[] | undefined
 
   expectTypeOf<
-  GetPathValue<TestTypeWithOptionalArray, 'optionalProp'>
+    GetPathValue<TestTypeWithOptionalArray, 'optionalProp'>
   >().toEqualTypeOf<ExpectedTypeWithOptionalArray>()
   expectTypeOf<GetPathValue<TestTypeWithOptionalArray, 'optionalProp.0'>>().toEqualTypeOf<
     string | undefined
@@ -443,7 +449,9 @@ it('PathValue works with optional (nested) members', () => {
   expectTypeOf<GetPathValue<TestType, 'optionalProp'>>().toEqualTypeOf<
     { stringProp: string } | undefined
   >()
-  expectTypeOf<GetPathValue<TestType, 'optionalProp.stringProp'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TestType, 'optionalProp.stringProp'>>().toEqualTypeOf<
+    string | undefined
+  >()
 })
 
 it('PathValue works with readonly (nested) members', () => {
@@ -513,8 +521,12 @@ it('PathValue works with nested index signatures', () => {
   expectTypeOf<GetPathValue<TestType, `${string}.${string}`>>().toEqualTypeOf<
     { a: string; b: number } | undefined
   >()
-  expectTypeOf<GetPathValue<TestType, `${string}.${string}.a`>>().toEqualTypeOf<string | undefined>()
-  expectTypeOf<GetPathValue<TestType, `${string}.${string}.b`>>().toEqualTypeOf<number | undefined>()
+  expectTypeOf<GetPathValue<TestType, `${string}.${string}.a`>>().toEqualTypeOf<
+    string | undefined
+  >()
+  expectTypeOf<GetPathValue<TestType, `${string}.${string}.b`>>().toEqualTypeOf<
+    number | undefined
+  >()
 })
 
 it('PathValue works with arrays', () => {
@@ -924,8 +936,6 @@ it('Returns the object itself if the path is empty', () => {
   expectTypeOf<GetPathValue<TestType, ''>>().toEqualTypeOf<TestType>()
 })
 
-
-
 test('PathValue returns unknown if we exceed its depth limit', () => {
   type TestA = {
     b: TestB
@@ -935,8 +945,18 @@ test('PathValue returns unknown if we exceed its depth limit', () => {
     a: TestA
   }
 
-  expectTypeOf<GetPathValue<TestA, 'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a'>>().toEqualTypeOf<TestA>()
-  expectTypeOf<GetPathValue<TestA, 'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b'>>().toBeUnknown()
+  expectTypeOf<
+    GetPathValue<
+      TestA,
+      'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a'
+    >
+  >().toEqualTypeOf<TestA>()
+  expectTypeOf<
+    GetPathValue<
+      TestA,
+      'b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b.a.b'
+    >
+  >().toBeUnknown()
 })
 
 test('SetPathValue vs GetPathValue', () => {
@@ -962,11 +982,17 @@ test('SetPathValue vs GetPathValue', () => {
   expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'a'>>().toEqualTypeOf<number | undefined>()
   expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'a'>>().toEqualTypeOf<number | undefined>()
 
-  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'b.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'b.nested'>>().toEqualTypeOf<
+    string | undefined
+  >()
   expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'b.nested'>>().toEqualTypeOf<string>()
 
-  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'c.nested'>>().toEqualTypeOf<string | undefined>()
-  expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'c.nested'>>().toEqualTypeOf<string | undefined>()
+  expectTypeOf<GetPathValue<TypeWithOptionalProperties, 'c.nested'>>().toEqualTypeOf<
+    string | undefined
+  >()
+  expectTypeOf<SetPathValue<TypeWithOptionalProperties, 'c.nested'>>().toEqualTypeOf<
+    string | undefined
+  >()
 
   // test noUncheckedIndexAccess
   type TypeWithArray = {

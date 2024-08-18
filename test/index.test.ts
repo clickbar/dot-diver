@@ -5,7 +5,6 @@ import { getByPath, setByPath } from '../src'
 
 import type { Path, SearchableObject, SetPathValue } from '../src'
 
-
 it('can get simple member', () => {
   const test = {
     first: 'test',
@@ -101,6 +100,7 @@ it('Test readme usage example: 🔎 getByPath and 🔏 setByPath', () => {
 })
 
 it('returns undefined on non objects', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const test: any = {
     first: 'test',
     null: null,
@@ -113,6 +113,7 @@ it('returns undefined on non objects', () => {
 })
 
 it('throws when setting invalid path', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const test: any = {
     first: 'test',
     null: null,
@@ -121,6 +122,7 @@ it('throws when setting invalid path', () => {
   }
 
   expect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setByPath(null as any, 'first', true)
   }).toThrowError("Cannot create property 'first' on null")
   expect(() => {
@@ -153,9 +155,8 @@ it('Test readme usage example: ⚙️ Customizing the Depth Limit', () => {
   function setByPathDepth5<
     T extends SearchableObject,
     P extends Path<T, P, { onlyWriteable: true; depth: 5 }> & string,
-    V extends SetPathValue<T, P>,
-  >(object: T, path: P, value: V): void {
-    setByPath(object, path, value as SetPathValue<T, P>)
+  >(object: T, path: P, value: SetPathValue<T, P>): void {
+    setByPath(object, path, value)
   }
 
   // previous readme test still works
@@ -274,7 +275,6 @@ it('Returns the object itself, if the given path is empty', () => {
 
   expect(getByPath(object, '')).toBe(object)
 })
-
 
 test('Vue 3 ref/reactive support', () => {
   const objectRef = ref({

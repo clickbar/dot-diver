@@ -37,10 +37,10 @@ type NestedType = PathValue<A, 'a.nested'> // string
 
 This is incorrect behavior, because `a` could also be a number and not an object with a `nested` property. This is now fixed.
 
-```PathValue``` was split into two different types:
+`PathValue` was split into two different types:
 
-- ```GetPathValue``` for reading values
-- ```SetPathValue``` for setting values
+- `GetPathValue` for reading values
+- `SetPathValue` for setting values
 
 the resulting types differ when accessing values in an object or setting them.
 
@@ -104,8 +104,7 @@ function getByPathDepth5<T extends SearchableObject, P extends Path<T, P, { dept
 function setByPathDepth5<
   T extends SearchableObject,
   P extends Path<T, P, { onlyWriteable: true; depth: 5 }> & string,
-  V extends SetPathValue<T, P>,
->(object: T, path: P, value: V): void {
+>(object: T, path: P, value: SetPathValue<T, P>): void {
   setByPath(object, path, value as SetPathValue<T, P>)
 }
 ```
