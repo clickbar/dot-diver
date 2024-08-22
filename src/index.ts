@@ -239,6 +239,7 @@ function getByPath<T extends SearchableObject, P extends PathEntry<T> & string>(
     if (
       typeof current !== 'object' ||
       current === null ||
+      (current as SafeObject)[pathPart] === undefined ||
       !hasOwnProperty.call(current, pathPart)
     ) {
       return undefined
