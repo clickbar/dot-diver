@@ -4,6 +4,8 @@ All notable changes to **dot-diver** will be documented here. Inspired by [keep 
 
 ## Unreleased
 
+## [1.0.7](https://github.com/clickbar/dot-diver/tree/1.0.7) (2024-08-22)
+
 - Fixed `getByPath` not triggering reactivity on Proxy objects (fixes #34, thanks @Tofandel)
 
 ## [1.0.6](https://github.com/clickbar/dot-diver/tree/1.0.6) (2024-03-25)
