@@ -90,6 +90,7 @@ type Writeable<T> = {
 
 // @see https://github.com/sindresorhus/type-fest/blob/2967fe62b55c7cc13fa003259e119f98edeb9c28/source/writable-keys-of.d.ts#L28
 type RemoveReadonlyProperties<T> = {
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
   [K in keyof T as IsEqual<{ [k in K]: T[K] }, { readonly [k in K]: T[K] }> extends false
     ? K
     : never]: T[K]
