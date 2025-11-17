@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           cache: 'pnpm'
-          node-version: '22'
+          node-version: '24'
           registry-url: https://registry.npmjs.org
 
       # Get the 'version' field out of the package.json file
@@ -35,6 +35,9 @@ jobs:
         with:
           script: core.setFailed('Release tag does not match package.json version!')
 
+      - name: update npm
+        run: npm update -g npm # temporary until setup-node action comes with npm version that contains oidc setup by default
+
       - name: Install dependencies
         run: pnpm install
 
@@ -43,5 +46,3 @@ jobs:
 
       - name: Create Publish to npm
         run: pnpm publish --provenance --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
