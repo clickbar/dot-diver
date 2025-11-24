@@ -15,12 +15,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
         with:
           cache: 'pnpm'
-          node-version: '20'
+          node-version: '24'
           registry-url: https://registry.npmjs.org
 
       # Get the 'version' field out of the package.json file
@@ -31,9 +31,12 @@ jobs:
       # Abort if the version in the package.json file doesn't match the tag name of the release
       - name: Check package.json version against tag name
         if: steps.package-json-version.outputs.version != github.event.release.tag_name
-        uses: actions/github-script@v3
+        uses: actions/github-script@v8
         with:
           script: core.setFailed('Release tag does not match package.json version!')
+
+      - name: update npm
+        run: npm update -g npm # temporary until setup-node action comes with npm version that contains oidc setup by default
 
       - name: Install dependencies
         run: pnpm install
@@ -43,5 +46,3 @@ jobs:
 
       - name: Create Publish to npm
         run: pnpm publish --provenance --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
